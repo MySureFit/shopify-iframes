@@ -2,72 +2,56 @@
 /* Weight-based: font-family 'Gilroy' with weights */
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/gilroy-light.woff2') format('woff2'),
-       url('/fonts/gilroy-light.woff')  format('woff'),
-       url('/fonts/gilroy-light.eot')   format('embedded-opentype');
+  src: url('/assets/gilroy-light.woff2') format('woff2');
   font-weight: 300;
   font-style: normal;
 }
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/Gilroy-Medium.woff') format('woff'),
-       url('/fonts/Gilroy-Medium.eot')  format('embedded-opentype'),
-       url('/fonts/Gilroy-Medium.otf')  format('opentype');
+  src: url('/assets/Gilroy-Medium.woff') format('woff');
   font-weight: 400;
   font-style: normal;
 }
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/Gilroy-Medium.woff') format('woff'),
-       url('/fonts/Gilroy-Medium.eot')  format('embedded-opentype'),
-       url('/fonts/Gilroy-Medium.otf')  format('opentype');
+  src: url('/assets/Gilroy-Medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
 }
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/gilroy-extrabold.woff') format('woff'),
-       url('/fonts/Gilroy-Bold.otf')       format('opentype');
+  src: url('/assets/gilroy-extrabold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
 }
 
-/* Named aliases — theme uses these as separate font-family values */
-/* 'gilroy' / 'Gilroy' as named family = light (matches Shopify theme @font-face) */
 @font-face {
   font-family: 'gilroy';
-  src: url('/fonts/gilroy-light.woff2') format('woff2'),
-       url('/fonts/gilroy-light.woff')  format('woff');
+  src: url('/assets/gilroy-light.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Gilroymedium';
-  src: url('/fonts/Gilroy-Medium.woff') format('woff'),
-       url('/fonts/Gilroy-Medium.eot')  format('embedded-opentype'),
-       url('/fonts/Gilroy-Medium.otf')  format('opentype');
+  src: url('/assets/Gilroy-Medium.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'gilroymedium';
-  src: url('/fonts/Gilroy-Medium.woff') format('woff'),
-       url('/fonts/Gilroy-Medium.eot')  format('embedded-opentype'),
-       url('/fonts/Gilroy-Medium.otf')  format('opentype');
+  src: url('/assets/Gilroy-Medium.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Gilroybold';
-  src: url('/fonts/gilroy-extrabold.woff') format('woff'),
-       url('/fonts/Gilroy-Bold.otf')       format('opentype');
+  src: url('/assets/gilroy-extrabold.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'gilroybold';
-  src: url('/fonts/gilroy-extrabold.woff') format('woff'),
-       url('/fonts/Gilroy-Bold.otf')       format('opentype');
+  src: url('/assets/gilroy-extrabold.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
@@ -82,7 +66,7 @@ body {
   font-weight: 300;
   line-height: 1.42857143;
   color: #333;
-  background: #f7f7f7;
+  background: #fff;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -609,349 +593,3 @@ html, body, #root { height: 100%; }
   background: #f0f0f0; font-size: 13px; font-weight: 500;
 }
 .size-chip.recommended { background: #1a1a1a; color: #fff; }
-
-/* ── Iframe top header (matches Shopify theme header style) ── */
-.iframe-top-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 20px;
-  border-bottom: 1px solid #e5e5e5;
-  background: #fff;
-  flex-shrink: 0;
-  min-height: 56px;
-}
-.iframe-top-brand { display: flex; align-items: center; gap: 10px; }
-.iframe-top-brand-name {
-  font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: #1a1a1a;
-  font-family: 'Gilroy', sans-serif;
-}
-.iframe-top-brand-sure { color: #8ac353; }
-.iframe-top-brand-tag { font-size: 10px; color: #aaa; line-height: 1.3; }
-.iframe-top-actions { display: flex; align-items: center; gap: 12px; }
-.iframe-enter-fr-btn {
-  display: flex; align-items: center; gap: 6px;
-  background: none; border: none; cursor: pointer;
-  font-size: 13px; font-weight: 500; color: #333;
-  font-family: 'Gilroy', sans-serif; position: relative;
-}
-.iframe-enter-fr-btn:hover { color: #000; }
-.iframe-fr-badge { width: 36px; height: 36px; object-fit: contain; }
-.iframe-fr-count {
-  position: absolute; top: -6px; left: -6px;
-  background: #3a7a3a; color: #fff;
-  font-size: 10px; font-weight: 700;
-  width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-}
-.iframe-close-btn {
-  width: 30px; height: 30px; border-radius: 50%;
-  border: none; background: #f0f0f0; color: #555;
-  font-size: 20px; line-height: 1; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s;
-}
-.iframe-close-btn:hover { background: #e0e0e0; color: #1a1a1a; }
-
-/* ══════════════════════════════════════════════════════
-   COLLECTION (Products iframe) — theme-matched layout
-   ══════════════════════════════════════════════════════ */
-
-/* Outer container — mirrors tec_main_container */
-.tec_main_container { display: block; overflow: hidden; }
-
-/* Sidebar — 20% width, sticky */
-.tec_search_filter_box {
-  width: 20%; float: left;
-  padding: 15px; padding-top: 20px; padding-left: 0;
-  position: sticky; top: 0;
-  overflow-y: auto; max-height: calc(100vh - 60px);
-  background: #fff;
-}
-.tec_side_search_box { margin-bottom: 20px; }
-.tec_side_search_box input {
-  background: #f3f3f3; border: none;
-  height: 40px; width: calc(100% + 15px);
-  padding: 15px; font-family: 'Gilroy', sans-serif;
-  font-size: 14px; outline: none;
-}
-
-.tec_side_filter_heading {
-  font-size: 17px; padding-bottom: 10px;
-  margin-bottom: 0; margin-top: 12px;
-  padding-left: 6px; font-family: 'Gilroy', sans-serif;
-}
-.tec_side_filter_heading span { font-family: 'Gilroymedium', sans-serif; }
-.tec_side_filter_container .flex {
-  display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid #dcdcdc;
-}
-
-/* Main grid area — 80% width */
-.tec_product_grid_container {
-  float: left; width: 80%;
-  overflow-y: auto; max-height: calc(100vh - 60px);
-  padding-bottom: 80px;
-}
-.tec_product_grid_header {
-  position: relative; padding: 10px 0 5px;
-}
-
-/* Gender collection title tabs */
-.handle-col { display: inline-block; }
-#tec_collection_header_title {
-  font-family: 'Gilroybold', sans-serif;
-  margin-bottom: 4px; padding-left: 4px;
-  padding-top: 5px; font-size: 20px;
-  display: inline-block;
-}
-.handle-col a {
-  display: inline-block;
-  color: #cccccc;
-  font-family: 'Gilroy', sans-serif;
-  font-weight: normal;
-  margin-right: 18px;
-  text-transform: uppercase;
-  text-decoration: none;
-  cursor: pointer;
-}
-.handle-col a:last-child { margin: 0; }
-.handle-col a.active {
-  font-family: 'Gilroybold', sans-serif;
-  color: #000; font-weight: bold;
-}
-.handle-col a:hover { color: #8ac353; }
-
-/* Sort box — absolute right */
-.tec_sort_box { position: absolute; right: 0; top: 11px; }
-.fc_sort_box { display: inline-flex; align-items: center; gap: 6px; }
-.tec_sort_label {
-  font-size: 12px; font-family: 'Gilroy', sans-serif;
-  color: #888; text-transform: uppercase; font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-/* Product grid */
-#tec_product_grid_box { margin-right: -10px; font-size: 0; }
-#tec_product_grid_box .tec_product_box { font-size: 14px; }
-
-.coll-price-range { font-size: 13px; color: #555; padding: 4px 6px; font-family: 'Gilroy', sans-serif; }
-
-/* Product card — theme style (override base) */
-.product-card {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 0;
-  overflow: hidden;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
-.product-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: none; }
-.product-card-meta {
-  padding: 7px 8px 3px;
-  display: flex; flex-direction: column; gap: 1px;
-}
-.product-card-brand { font-size: 12px; font-weight: 500; color: #3a7a3a; font-family: 'Gilroy', sans-serif; }
-.product-card-price { font-size: 14px; font-weight: 700; color: #3a7a3a; font-family: 'Gilroy', sans-serif; }
-.product-card-image-wrap {
-  position: relative;
-  aspect-ratio: 3/4;
-  background: #f5f5f5;
-  overflow: hidden;
-}
-.product-card-image-wrap img {
-  width: 100%; height: 100%; object-fit: cover;
-  transition: transform 0.3s;
-}
-.product-card:hover .product-card-image-wrap img { transform: scale(1.03); }
-.product-card-no-img {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  color: #ccc; font-size: 11px; background: #f5f5f5;
-}
-
-/* ════════════════════════════════════════════════════════
-   THEME CLASSES — mirrors mysurefit.co exactly
-   ════════════════════════════════════════════════════════ */
-
-.btn_primary {
-  background: #000; border: none; border-radius: 0; color: white;
-  padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
-  -webkit-appearance: none; opacity: 1; font-family: 'Gilroy', sans-serif; cursor: pointer;
-}
-.btn_primary:hover { color: white !important; background: #a89572; }
-
-/* ── Product box ── */
-.tec_product_box {
-  border: 2px solid #dcdcdc;
-  width: 24.5%;
-  display: inline-block;
-  margin: 0.5%;
-  margin-left: 0;
-  margin-bottom: 0;
-  position: relative;
-  transition: .5s all;
-  overflow: hidden;
-  vertical-align: top;
-}
-.tec_product_box:hover { border: 2px solid black; transition: 1s all; }
-.tec_product_box.withoutModel.activeproduct { border: 2px solid #8ac353; }
-.tec_product_box.withoutModel.activeproduct a { color: #8ac353; }
-
-.tec_product_box .fitting_room_cl_prod_link {
-  font-family: 'Gilroymedium', sans-serif;
-  font-size: 20px; display: block; color: black;
-  text-decoration: none; position: relative;
-}
-.fitting_room_cl_prod_link:hover { color: #9f8f70 !important; text-decoration: none !important; }
-
-/* Brand name absolute overlay (top-left of image) */
-.fitting_room_cl_brand_new {
-  position: absolute; top: 0;
-  font-size: 13px; color: #2c2c2c;
-  padding-left: 5px; padding-right: 20px;
-  font-family: 'Gilroymedium', sans-serif;
-  margin: 3px 0 0; z-index: 200; width: 100%;
-}
-.activeproduct .fitting_room_cl_brand_new { color: #92d050; }
-
-/* Price absolute overlay (below brand) */
-.tec_price_text {
-  position: absolute; top: 20px; left: 5px;
-  color: black; z-index: 202;
-}
-.activeproduct .tec_price_text { color: #92d050; }
-
-.tec_product_box_img { width: 100%; display: block; height: auto; }
-.tec_product_no_img { min-height: 180px; background: #f5f5f5; }
-
-.tt_add_to_fr_launcher {
-  position: absolute; border: none;
-  width: 50px; height: 50px; padding: 0;
-  background: transparent;
-  bottom: 15px; right: 15px;
-}
-
-/* MSF hanger button (bottom-right of image) */
-.tec_product_box_msf.tec_add_msf {
-  position: absolute; border: none;
-  width: 50px; height: 50px; padding: 0;
-  background: transparent;
-  bottom: 15px; right: 15px;
-  transition: .3s all; cursor: pointer;
-}
-.tec_product_box_msf.tec_add_msf:hover .fr_product_try_btn { transform: scale(1.1); }
-.fr_product_try_btn {
-  width: 31px !important; position: absolute; top: 6px; right: 6px;
-}
-.fr_product_try_btn.fr_product_in_fr { display: none; }
-.tec_product_box_msf.tec_add_msf.activeproduct > .fr_product_try_btn.fr_product_in_fr { display: block; }
-.tec_product_box_msf.tec_add_msf.activeproduct > .fr_product_try_btn:not(.fr_product_in_fr) { display: none; }
-
-/* ── Sort dropdown ── */
-.collection-sort__input {
-  padding: 12px 10px 12px 5px; font-size: 14px;
-  border: none; opacity: 1;
-  font-family: 'Gilroy', sans-serif; font-weight: bold;
-  background: black; border-radius: 0; color: white;
-  height: 44px !important; cursor: pointer;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
-  display: inline-block;
-}
-.collection-sort__input:hover { background-color: #9f8f70; }
-
-/* ── Filter accordion ── */
-.tec_filter_single_filter_box { display: block; }
-
-.tec_filter_cat_btn.btn_primary {
-  background: transparent; color: #333;
-  font-size: 17px; border: none; box-shadow: none;
-  text-align: left; display: block;
-  border-bottom: 1px solid #dcdcdc;
-  width: 100%; text-transform: uppercase;
-  font-family: 'Gilroy', sans-serif;
-  padding: 8px 6px; position: relative;
-  cursor: pointer;
-}
-.tec_filter_cat_btn.btn_primary:hover { color: #333 !important; text-decoration: none; }
-.tec_filter_cat_btn.btn_primary.filter_active { border-color: #fff; font-family: 'Gilroymedium', sans-serif; }
-.tec_filter_cat_btn.btn_primary.filter_active .tec_filter_caret.caret {
-  transform: rotate(180deg); transition: .1s all;
-}
-.tec_filter_caret.caret {
-  display: inline-block; width: 0; height: 0;
-  border-top: 4px dashed; border-right: 4px solid transparent; border-left: 4px solid transparent;
-  position: absolute; right: 9px; top: 16px; transition: transform .1s;
-}
-
-/* "8 TOTAL" badge — absolutely positioned right of filter heading */
-.tec_filter_single_filter_box { position: relative; clear: both; }
-.tec_filter_single_clear_box {
-  position: absolute; right: 52px; top: 0;
-  z-index: 1000; height: 35px; padding-top: 7px; width: 50px;
-}
-.tec_filter_single_clear_box.faded {
-  right: 41px; z-index: 1;
-}
-.tec_filter_single_clear_box.faded .box {
-  display: flex; align-items: center; height: 100%;
-}
-.tec_filter_single_clear_box.faded .txt {
-  font-size: 11px; color: gray; padding: 0 4px;
-  width: 22px; text-align: right; margin: 0;
-}
-.tec_filter_active_icon {
-  display: inline-block; width: 10px; height: 10px;
-  background: #e3e3e3; border-radius: 60px; margin-left: 3px;
-}
-
-/* Filter content (sidebar — static, not the floating top-bar variant) */
-.fc_box { display: none; }
-.fc_box.open_filter { display: block; padding: 4px 0 8px; }
-.fc_box ul { padding-left: 0; list-style: none; margin-bottom: 0; }
-.fc_box li { display: block; padding: 3px 4px; }
-
-.fc_filter_link {
-  font-size: 14px; font-family: 'Gilroymedium', sans-serif;
-  color: #333; text-decoration: none; display: block; cursor: pointer;
-}
-.fc_filter_link:hover { color: #9f8f70; }
-.fc_filter_num {
-  font-family: 'Gilroy', sans-serif; margin-left: 3px;
-  display: inline-block; font-size: 13px; color: grey;
-}
-.fc_filter_color {
-  width: 22px; height: 22px; display: inline-block;
-  border-radius: 50%; margin-bottom: -6px; margin-right: 6px;
-  box-shadow: 1px 2px 3px #9a9a9a;
-}
-
-/* Material checkbox */
-.fr_mat_checkbox {
-  z-index: 0; position: relative; display: inline-block;
-  color: #333; font-family: 'Gilroymedium', sans-serif; font-size: 13px; line-height: 1.5;
-}
-.fr_mat_checkbox > input {
-  appearance: none; z-index: -1; position: absolute;
-  left: -10px; top: -8px; display: block; margin: 0;
-  border-radius: 50%; width: 40px; height: 40px;
-  background-color: white; box-shadow: none; outline: none;
-  opacity: 0; transform: scale(1); pointer-events: none;
-  transition: opacity 0.3s, transform 0.2s;
-}
-.fr_mat_checkbox > span { display: inline-block; width: 100%; cursor: pointer; }
-.fr_mat_checkbox > span::before {
-  content: ""; display: inline-block; box-sizing: border-box;
-  margin: 1px 6px 0 1px; border: solid 2px #d4d4d4;
-  border-radius: 2px; width: 18px; height: 18px; vertical-align: top;
-  transition: border-color 0.2s, background-color 0.2s;
-}
-.fr_mat_checkbox > span::after {
-  content: ""; display: block; position: absolute;
-  top: 2px; left: 2px; width: 10px; height: 5px;
-  border: solid 2px transparent; border-right: none; border-top: none;
-  transform: translate(3px, 4px) rotate(-45deg);
-}
-.fr_mat_checkbox > input:checked { background-color: #a89572; }
-.fr_mat_checkbox > input:checked + span::before { border-color: #a89572; background-color: #a89572; }
-.fr_mat_checkbox > input:checked + span::after { border-color: #a89572; }
-.fr_mat_checkbox:hover > input { opacity: 0.04; }
-.fr_mat_checkbox > input:focus { opacity: 0.12; }

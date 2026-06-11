@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import coreApi from '../api/coreApi';
 import ProductCard from '../components/ProductCard';
-import VFRBar from '../components/VFRBar';
+import CollectionSortSelect from '../components/CollectionSortSelect';
 import IframeHeader from '../components/IframeHeader';
 
 const GENDER_TABS = [
@@ -11,10 +11,10 @@ const GENDER_TABS = [
 ];
 
 const SORT_OPTIONS = [
-  { label: 'Default',          sortby: '',       orderby: '' },
   { label: 'Date, new to old', sortby: 'date',   orderby: 'desc' },
-  { label: 'Price: low–high',  sortby: 'price',  orderby: 'asc' },
-  { label: 'Price: high–low',  sortby: 'price',  orderby: 'desc' },
+  { label: 'Price, high to low', sortby: 'price', orderby: 'desc' },
+  { label: 'Price, low to high', sortby: 'price', orderby: 'asc' },
+  { label: 'Date, old to new', sortby: 'date',   orderby: 'asc' },
 ];
 
 export default function ProductsIframe() {
@@ -69,19 +69,28 @@ export default function ProductsIframe() {
   const brandCount = Object.keys(facets.brand ?? {}).length;
 
   return (
-    <div className="iframe-page">
+    <div className="iframe-page collection-page">
       <IframeHeader />
 
       <div className="tec_main_container">
         {/* ── Sidebar ── */}
         <div className="tec_search_filter_box">
           <div className="tec_side_search_box">
-            <input
-              type="search"
-              placeholder="Search..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
+            <form className="fr_qs_form" onSubmit={e => e.preventDefault()}>
+              <div className="fr_qs_input_box">
+                <input
+                  id="fr_search_box"
+                  type="search"
+                  className="fr_search_input"
+                  placeholder="Search..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+                <button className="fr_qs_input_btn" type="button" tabIndex={-1}>
+                  <img src="/assets/search.svg" alt="" />
+                </button>
+              </div>
+            </form>
           </div>
 
           <div id="fr_filter_origin_box">
@@ -184,17 +193,11 @@ export default function ProductsIframe() {
               </h1>
             </div>
             <div className="tec_sort_box">
-              <div className="fc_sort_box">
-                <label className="tec_sort_label" htmlFor="fr_select_sort">Sort by</label>
-                <select
-                  className="collection-sort__input"
-                  id="fr_select_sort"
-                  value={sortIdx}
-                  onChange={e => setSortIdx(Number(e.target.value))}
-                >
-                  {SORT_OPTIONS.map((o, i) => <option key={i} value={i}>{o.label}</option>)}
-                </select>
-              </div>
+              <CollectionSortSelect
+                options={SORT_OPTIONS}
+                value={sortIdx}
+                onChange={setSortIdx}
+              />
             </div>
           </div>
 
@@ -232,8 +235,6 @@ export default function ProductsIframe() {
           )}
         </div>
       </div>
-
-      <VFRBar />
     </div>
   );
 }
@@ -244,7 +245,7 @@ function FilterSection({ label, badge, open, onToggle, children }) {
       {badge != null && (
         <div className="tec_filter_single_clear_box faded" style={{ display: 'block' }}>
           <div className="box">
-            <p className="txt" style={{ margin: 0 }}>{badge} TOTAL</p>
+            <p className="txt" id="totalBrandsCount">{badge} TOTAL</p>
             <div className="tec_filter_active_icon" />
           </div>
         </div>

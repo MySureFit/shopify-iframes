@@ -1,0 +1,843 @@
+/* Collection page + slim theme header — ported from traditional-styles.css */
+
+/* ── Header ─────────────────────────────────────────── */
+.tec_header {
+  height: 60px;
+  border-bottom: 1px solid #dcdcdc;
+  margin-left: 25px;
+  margin-right: 23px;
+  font-family: Gilroy, sans-serif;
+  z-index: 1200;
+  background: #fff;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tec_logo_box {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.tec_logo_img {
+  max-width: 160px;
+  margin-top: 4px;
+  display: block;
+}
+
+.taglines {
+  font-weight: bold;
+  color: #ccc;
+  min-width: 90px;
+  line-height: 1 !important;
+  font-size: 12px;
+  margin-left: 10px;
+}
+
+.tec_right_icon_box {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 0;
+}
+
+#fr_mobile_fr_btn_origin_box {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tec_enter_fr_box {
+  font-family: Gilroymedium, sans-serif;
+  width: auto;
+  position: relative;
+  margin-right: 8px;
+}
+
+.tec_enter_fr_link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: Gilroymedium, sans-serif;
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  padding-right: 8px;
+}
+
+.tec_enter_fr_link:hover {
+  color: #333;
+  text-decoration: none;
+}
+
+.tec_msf_logo,
+.try_on_logo {
+  width: 22px;
+  height: auto;
+}
+
+#fr_count {
+  display: block;
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background-color: #8ac353;
+  color: #fff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  line-height: 17px;
+  font-weight: 800;
+  font-size: 9px;
+  z-index: 100;
+}
+
+.gst_fr_right_menu_box {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  margin-left: 10px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.gst_right_header_login_box {
+  margin-left: 35px;
+  margin-right: 15px;
+}
+
+.gst_right_header_text {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.gst_right_header_text a {
+  color: #a5cd82;
+  font-size: 16px;
+  font-family: Gilroybold, sans-serif;
+  text-decoration: none;
+}
+
+.gst_fr_cart_dropdown_box {
+  float: left;
+  margin-right: 12px;
+}
+
+.gst_fr_cart_dropdown_box .top-cart {
+  margin: 0;
+}
+
+.gst_fr_cart_dropdown_box .top-cart a {
+  display: block;
+  text-decoration: none;
+}
+
+.shopping_cart_icon {
+  width: 22px;
+  height: auto;
+  display: block;
+}
+
+.tec_rewards_box {
+  float: left;
+  text-align: center;
+  min-width: 52px;
+}
+
+.tec_rewards_link {
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+
+.tec_rewards_value {
+  font-family: Gilroybold, sans-serif;
+  font-size: 19px;
+  color: #92c368;
+  margin-bottom: -6px;
+}
+
+.tec_rewards_desc {
+  margin-bottom: 0;
+  font-size: 10px;
+  font-family: Gilroymedium, sans-serif;
+  text-align: center;
+  color: #333;
+}
+
+.tec_menu_box {
+  margin-left: 8px;
+}
+
+.menu_dropdown_btn {
+  width: 21px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  margin-top: 5px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.menu_dropdown_btn .icon-bar {
+  background-color: #000;
+  width: 20px;
+  height: 2px;
+  display: block;
+  border-radius: 2px;
+  margin-top: 5px;
+}
+
+.menu_dropdown_btn .icon-bar:first-child {
+  margin-top: 0;
+}
+
+.hidden-xs {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .hidden-xs { display: none; }
+}
+
+/* ── Page shell ─────────────────────────────────────── */
+.iframe-page.collection-page {
+  display: block;
+  height: auto;
+  min-height: 100vh;
+  overflow: auto;
+  background: #fff;
+}
+
+/* Override generic iframe flex shell for collection layout */
+.iframe-page.collection-page .tec_main_container {
+  clear: both;
+}
+
+.tec_main_container {
+  display: block;
+  overflow: hidden;
+  margin-left: 25px;
+  margin-right: 25px;
+}
+
+/* ── Sidebar ────────────────────────────────────────── */
+.tec_search_filter_box {
+  width: 20%;
+  float: left;
+  padding: 15px;
+  padding-top: 56px;
+  padding-left: 0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
+
+.tec_side_search_box {
+  margin-bottom: 20px;
+}
+
+.fr_qs_form,
+.fr_qs_input_box {
+  position: relative;
+}
+
+.tec_side_search_box input,
+.fr_search_input {
+  background: #f3f3f3;
+  border: none;
+  height: 40px;
+  width: calc(100% + 50px);
+  padding: 15px 50px 15px 15px;
+  font-family: Gilroy, sans-serif;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.fr_qs_input_btn {
+  position: absolute;
+  border: none;
+  top: 0;
+  right: 2px;
+  height: 40px;
+  width: 50px;
+  padding: 5px;
+  background: #f3f3f3;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fr_qs_input_btn img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.5;
+}
+
+.tec_side_filter_heading {
+  font-size: 17px;
+  padding-bottom: 10px;
+  margin-bottom: 0;
+  margin-top: 12px;
+  padding-left: 6px;
+  font-family: Gilroy, sans-serif;
+}
+
+.tec_side_filter_heading span {
+  font-family: Gilroymedium, sans-serif;
+}
+
+.tec_side_filter_container .flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #dcdcdc;
+}
+
+/* ── Grid area ──────────────────────────────────────── */
+.tec_product_grid_container {
+  float: left;
+  width: 80%;
+  padding-bottom: 40px;
+}
+
+.tec_product_grid_header {
+  position: relative;
+  padding: 10px 0 5px;
+}
+
+.handle-col { display: inline-block; }
+
+#tec_collection_header_title {
+  font-family: Gilroybold, sans-serif;
+  margin-bottom: 4px;
+  padding-left: 4px;
+  padding-top: 5px;
+  font-size: 20px;
+  display: inline-block;
+  text-transform: capitalize;
+}
+
+.handle-col a {
+  display: inline-block;
+  color: #cccccc;
+  font-family: Gilroy, sans-serif;
+  font-weight: normal;
+  margin-right: 18px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.handle-col a:last-child { margin: 0; }
+
+.handle-col h1 a:hover { color: #8ac353; }
+
+.handle-col a.active {
+  font-family: Gilroybold, sans-serif;
+  color: #000;
+  font-weight: bold;
+  cursor: default;
+  pointer-events: none;
+}
+
+.tec_sort_box {
+  position: absolute;
+  right: 0;
+  top: 11px;
+}
+
+.fc_sort_box {
+  float: left;
+  height: 44px !important;
+  margin-left: 0;
+}
+
+/* Theme custom select (general-scripts.js + traditional-styles.css SHOP-5300) */
+.fc_sort_box .custom_select {
+  display: inline-block;
+}
+
+.fc_sort_box .s-hidden {
+  visibility: hidden;
+  padding-right: 10px;
+  height: 35px;
+  position: absolute;
+  pointer-events: none;
+}
+
+.fc_sort_box .c_select {
+  min-width: 240px;
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  font-weight: normal;
+  border: 1px solid #ccc;
+  background: #fff;
+  height: 35px;
+}
+
+.fc_sort_box .styledSelect {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.fc_sort_box .styledSelect label {
+  position: relative;
+  z-index: 1;
+  margin: 0 10px 0 0;
+  color: #333;
+  font-size: 12px;
+  font-family: Gilroy, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.fc_sort_box .styledSelect .selected_option {
+  color: #555;
+  width: 130px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-family: Gilroy, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc_sort_box .styledSelect:after {
+  content: '';
+  width: 0;
+  height: 0;
+  border: 4px dashed transparent;
+  border-color: #333 transparent transparent transparent;
+  position: absolute;
+  top: calc(50% - 1px);
+  right: 3px;
+}
+
+.fc_sort_box .c_select .options {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: auto;
+  right: 0;
+  z-index: 1010;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  min-width: 140px;
+}
+
+.fc_sort_box .c_select .options li {
+  margin: 0;
+  padding: 3px 10px;
+  position: relative;
+  color: #333;
+  font-family: Gilroy, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fc_sort_box .c_select .options li.selected {
+  background: #f1f1f1;
+}
+
+.fc_sort_box .c_select .options li:hover {
+  background-color: #39f;
+  color: #fff;
+}
+
+/* ── Product grid ───────────────────────────────────── */
+#tec_product_grid_box {
+  margin-right: -10px;
+  font-size: 0;
+}
+
+#tec_product_grid_box .tec_product_box {
+  font-size: 14px;
+}
+
+.tec_product_box {
+  border: 2px solid #dcdcdc;
+  width: 24.5%;
+  display: inline-block;
+  margin: 0.5%;
+  margin-left: 0;
+  margin-bottom: 0;
+  position: relative;
+  transition: 0.5s all;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.tec_product_box:hover {
+  border: 2px solid #000;
+  transition: 1s all;
+}
+
+.tec_product_box:hover a { color: unset; }
+
+.tec_product_box.withoutModel.activeproduct {
+  border: 2px solid #8ac353;
+}
+
+.tec_product_box.withoutModel.activeproduct a {
+  color: #8ac353;
+}
+
+.tec_product_box .fitting_room_cl_prod_link {
+  margin-top: 0;
+  font-family: Gilroymedium, sans-serif;
+  font-size: 20px;
+  display: block;
+  color: #000;
+  text-decoration: none;
+  position: relative;
+}
+
+.fitting_room_cl_prod_link:hover {
+  color: #9f8f70 !important;
+  text-decoration: none !important;
+}
+
+.fitting_room_cl_brand_new {
+  position: absolute;
+  top: 0;
+  font-size: 13px;
+  color: #2c2c2c;
+  padding-left: 5px;
+  padding-right: 20px;
+  font-family: Gilroymedium, sans-serif;
+  margin: 3px 0 0;
+  z-index: 200;
+  width: 100%;
+}
+
+.activeproduct .fitting_room_cl_brand_new {
+  color: #92d050;
+}
+
+@media (max-width: 768px) {
+  .fitting_room_cl_brand_new {
+    font-size: 10px;
+    padding-right: 5px;
+  }
+}
+
+.tec_price_text {
+  position: absolute;
+  top: 20px;
+  left: 5px;
+  color: #000;
+  z-index: 202;
+  font-family: Gilroymedium, sans-serif;
+  margin: 0;
+}
+
+.activeproduct .tec_price_text {
+  color: #92d050;
+}
+
+.tec_product_box_img {
+  width: 100%;
+  display: block;
+  height: auto;
+}
+
+.tec_product_no_img {
+  min-height: 180px;
+  background: #f5f5f5;
+}
+
+.tt_add_to_fr_launcher {
+  position: absolute;
+  border: none;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  background: transparent;
+  bottom: 15px;
+  right: 15px;
+}
+
+.tec_product_box_msf.tec_add_msf {
+  position: absolute;
+  border: none;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  background: transparent;
+  bottom: 15px;
+  right: 15px;
+  transition: 0.3s all;
+  cursor: pointer;
+}
+
+.tec_product_box.withoutModel .tec_product_box_msf.tec_add_msf {
+  width: 50px;
+  height: 50px;
+}
+
+.tec_product_box_msf.tec_add_msf:hover .fr_product_try_btn {
+  transform: scale(1.1);
+}
+
+.fr_product_try_btn {
+  width: 50px !important;
+  height: 50px !important;
+  position: absolute;
+  top: 0;
+  right: 0;
+  object-fit: contain;
+}
+
+.fr_product_try_btn.fr_product_in_fr { display: none; }
+
+.tec_product_box_msf.tec_add_msf.activeproduct > .fr_product_try_btn.fr_product_in_fr {
+  display: block;
+}
+
+.tec_product_box_msf.tec_add_msf.activeproduct > .fr_product_try_btn:not(.fr_product_in_fr) {
+  display: none;
+}
+
+/* ── Filter accordion ───────────────────────────────── */
+.btn_primary {
+  background: #000;
+  border: none;
+  border-radius: 0;
+  color: #fff;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+  font-family: Gilroy, sans-serif;
+  cursor: pointer;
+}
+
+.btn_primary:hover {
+  color: #fff !important;
+  background: #a89572;
+}
+
+.tec_filter_single_filter_box {
+  display: block;
+  position: relative;
+  clear: both;
+}
+
+.tec_filter_cat_btn.btn_primary {
+  background: transparent;
+  color: #333;
+  font-size: 17px;
+  border: none;
+  box-shadow: none;
+  text-align: left;
+  display: block;
+  border-bottom: 1px solid #dcdcdc;
+  width: 100%;
+  text-transform: uppercase;
+  font-family: Gilroy, sans-serif;
+  padding: 8px 6px;
+  position: relative;
+  cursor: pointer;
+}
+
+.tec_filter_cat_btn.btn_primary:hover {
+  color: #333 !important;
+  text-decoration: none;
+}
+
+.tec_filter_cat_btn.btn_primary.filter_active {
+  border-color: #fff;
+  font-family: Gilroymedium, sans-serif;
+}
+
+.tec_filter_caret.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 4px dashed;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  position: absolute;
+  right: 9px;
+  top: 16px;
+  transition: transform 0.1s;
+}
+
+.tec_filter_cat_btn.btn_primary.filter_active .tec_filter_caret.caret {
+  transform: rotate(180deg);
+}
+
+.tec_filter_single_clear_box {
+  position: absolute;
+  right: 52px;
+  top: 0;
+  z-index: 1000;
+  height: 35px;
+  padding-top: 7px;
+  width: 50px;
+}
+
+.tec_filter_single_clear_box.faded {
+  z-index: 1;
+  right: 41px;
+}
+
+.tec_filter_single_clear_box.faded .box {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-right: 18px;
+}
+
+.tec_filter_single_clear_box.faded .txt {
+  font-size: 11px;
+  color: gray;
+  display: inline-block;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.tec_filter_active_icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: #e3e3e3;
+  border-radius: 60px;
+  margin-left: 3px;
+  flex-shrink: 0;
+}
+
+.tec_filter_single_clear_box.faded .tec_filter_active_icon {
+  background: #e3e3e3;
+  margin-left: 3px;
+}
+
+.fc_box { display: none; }
+.fc_box.open_filter { display: block; padding: 4px 0 8px; }
+.fc_box ul { padding-left: 0; list-style: none; margin-bottom: 0; }
+.fc_box li { display: block; padding: 3px 4px; }
+
+.fc_filter_link {
+  font-size: 14px;
+  font-family: Gilroymedium, sans-serif;
+  color: #333;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.fc_filter_link:hover { color: #9f8f70; }
+
+.fc_filter_num {
+  font-family: Gilroy, sans-serif;
+  margin-left: 3px;
+  display: inline-block;
+  font-size: 13px;
+  color: grey;
+}
+
+.fc_filter_color {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  border-radius: 50%;
+  margin-bottom: -6px;
+  margin-right: 6px;
+  box-shadow: 1px 2px 3px #9a9a9a;
+}
+
+.coll-price-range {
+  font-size: 13px;
+  color: #555;
+  padding: 4px 6px;
+  font-family: Gilroy, sans-serif;
+}
+
+.fr_mat_checkbox {
+  z-index: 0;
+  position: relative;
+  display: inline-block;
+  color: #333;
+  font-family: Gilroymedium, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.fr_mat_checkbox > input {
+  appearance: none;
+  z-index: -1;
+  position: absolute;
+  left: -10px;
+  top: -8px;
+  display: block;
+  margin: 0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background-color: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fr_mat_checkbox > span {
+  display: inline-block;
+  width: 100%;
+  cursor: pointer;
+}
+
+.fr_mat_checkbox > span::before {
+  content: "";
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 1px 6px 0 1px;
+  border: solid 2px #d4d4d4;
+  border-radius: 2px;
+  width: 18px;
+  height: 18px;
+  vertical-align: top;
+}
+
+.fr_mat_checkbox > input:checked + span::before {
+  border-color: #a89572;
+  background-color: #a89572;
+}
+
+/* ── Clear floats ───────────────────────────────────── */
+.tec_main_container::after {
+  content: "";
+  display: table;
+  clear: both;
+}
