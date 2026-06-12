@@ -12,10 +12,14 @@ export function AuthProvider({ children }) {
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
 
-  // Bootstrap guest session on mount — mirrors the theme's get_auth() call.
-  // Always runs so the server can track the visitor and return a fresh token.
+  // Bootstrap guest session on mount only when no token exists yet.
   useEffect(() => {
     const initSession = async () => {
+      const existingToken = localStorage.getItem(LS_TOKEN_KEY);
+      if (existingToken) {
+        setSessionReady(true);
+        return;
+      }
       try {
         const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
         const { data } = await syncApi.get('session/create', {

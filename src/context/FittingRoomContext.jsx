@@ -1,12 +1,14 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import syncApi from '../api/syncApi';
 import coreApi from '../api/coreApi';
 import { useAuth } from './AuthContext';
 
 const FittingRoomContext = createContext(null);
 const LS_KEY = 'ss_fr';
+const LS_FR_USER_ID = 'ss_fr_user_id';
+const MODELS_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
-const DEFAULT = { products: [], currentModel: null, allModels: [] };
+const DEFAULT = { products: [], currentModel: null, allModels: [], modelsLoadedAt: null };
 
 function readLS() {
   try { return { ...DEFAULT, ...JSON.parse(localStorage.getItem(LS_KEY)) }; }
@@ -24,6 +26,7 @@ export const getLayerZ = (layerName) => LAYER_Z[parseInt(layerName)] ?? 8;
 export function FittingRoomProvider({ children }) {
   const { token } = useAuth();
   const [state, setStateRaw] = useState(readLS);
+  const loadedForToken = useRef(null); // guard: only load once per unique token
 
   // Sync from other iframes via storage events (fires in all frames EXCEPT the one that wrote)
   useEffect(() => {
@@ -44,16 +47,18 @@ export function FittingRoomProvider({ children }) {
     });
   }, []);
 
-  const { products, currentModel, allModels } = state;
+  const { products, currentModel, allModels, modelsLoadedAt } = state;
   const [isLoadingModels, setLoadingModels] = useState(false);
   const [isLoadingMorph,  setLoadingMorph]  = useState(false);
 
-  // Load fitting room products from server whenever a session token is available
+  // Load fitting room products from server once per unique token
   useEffect(() => {
-    if (!token) return;
+    if (!token || loadedForToken.current === token) return;
+    loadedForToken.current = token;
+    const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
     const load = async () => {
       try {
-        const { data } = await syncApi.get('fitting_room/get_fittingroom_products/');
+        const { data } = await syncApi.get(`fitting_room/get_fittingroom_products/${frUserId}`);
         const items = data.products ?? data.data ?? (Array.isArray(data) ? data : []);
         const mapped = items.map(item => ({
           v3_product_id:      item.v3_product_id ?? item.product_id,
@@ -69,6 +74,8 @@ export function FittingRoomProvider({ children }) {
     };
     load();
   }, [token]);
+
+  const isModelsStale = !modelsLoadedAt || (Date.now() - modelsLoadedAt > MODELS_CACHE_TTL);
 
   const isInFittingRoom = useCallback(
     (v3Id) => products.some((p) => p.v3_product_id === v3Id),
@@ -115,7 +122,12 @@ export function FittingRoomProvider({ children }) {
       const { data } = await syncApi.get('demomodel/list_all_models');
       const models = data.selfie_model ?? data.data ?? [];
       const selected = models.find((m) => m.is_selected) ?? null;
-      setState((prev) => ({ ...prev, allModels: models, currentModel: selected ?? prev.currentModel }));
+      setState((prev) => ({
+        ...prev,
+        allModels: models,
+        currentModel: selected ?? prev.currentModel,
+        modelsLoadedAt: Date.now(),
+      }));
       return models;
     } catch (err) {
       console.error('loadModels:', err);
@@ -164,7 +176,7 @@ export function FittingRoomProvider({ children }) {
 
   return (
     <FittingRoomContext.Provider value={{
-      products, currentModel, allModels,
+      products, currentModel, allModels, modelsLoadedAt, isModelsStale,
       isLoadingModels, isLoadingMorph,
       isInFittingRoom, toggleProduct, addProduct, removeProduct,
       updateProductColor, loadModels, selectModel, fetchMorphedImages,

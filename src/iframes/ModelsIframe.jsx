@@ -103,12 +103,12 @@ function DemoModelCard({ model, isSelected, onSelect }) {
 
 export default function ModelsIframe() {
   const { isAuthenticated } = useAuth();
-  const { allModels, currentModel, isLoadingModels, loadModels, selectModel } = useFittingRoom();
+  const { allModels, currentModel, isLoadingModels, isModelsStale, loadModels, selectModel } = useFittingRoom();
   const [calibrated, setCalibrated] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (allModels.length === 0) loadModels();
+    if (allModels.length === 0 || isModelsStale) loadModels();
     checkCalibration();
   }, [isAuthenticated]);
 
