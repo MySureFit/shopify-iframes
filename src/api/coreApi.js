@@ -7,6 +7,8 @@ const coreApi = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Serialize arrays as repeated params: color=Black&color=Blue (not color[]=...)
+  paramsSerializer: { indexes: null },
 });
 
 coreApi.interceptors.request.use((config) => {

@@ -55,7 +55,7 @@
   font-family: Gilroymedium, sans-serif;
   width: auto;
   position: relative;
-  margin-right: 8px;
+  margin-left: auto;
 }
 
 .tec_enter_fr_link {
@@ -304,6 +304,30 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #dcdcdc;
+}
+
+.clear_all_fltr {
+  text-transform: uppercase;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  margin-left: 5px;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: Gilroy, sans-serif;
+}
+
+.clear_all_fltr:hover {
+  color: #333;
+  text-decoration: none;
+}
+
+.clear_all_fltr svg {
+  width: 15px;
+  height: 15px;
+  margin-left: 5px;
 }
 
 /* ── Grid area ──────────────────────────────────────── */
@@ -664,9 +688,12 @@
   width: 100%;
   text-transform: uppercase;
   font-family: Gilroy, sans-serif;
-  padding: 8px 6px;
+  padding: 5px 28px 5px 6px;
   position: relative;
   cursor: pointer;
+  line-height: 1.4;
+  min-height: 35px;
+  box-sizing: border-box;
 }
 
 .tec_filter_cat_btn.btn_primary:hover {
@@ -683,12 +710,13 @@
   display: inline-block;
   width: 0;
   height: 0;
-  border-top: 4px dashed;
+  border-top: 4px dashed #333;
   border-right: 4px solid transparent;
   border-left: 4px solid transparent;
   position: absolute;
   right: 9px;
-  top: 16px;
+  top: 50%;
+  margin-top: -2px;
   transition: transform 0.1s;
 }
 
@@ -702,13 +730,16 @@
   top: 0;
   z-index: 1000;
   height: 35px;
-  padding-top: 7px;
   width: 50px;
+  display: block;
+  box-sizing: border-box;
 }
 
 .tec_filter_single_clear_box.faded {
   z-index: 1;
   right: 41px;
+  width: auto;
+  padding-top: 7px;
 }
 
 .tec_filter_single_clear_box.faded .box {
@@ -730,14 +761,34 @@
   line-height: 1.1;
 }
 
+.tec_filter_total_active_box {
+  display: inline-block;
+  line-height: 35px;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.tec_filter_total_active_text {
+  padding: 0 4px;
+  color: gray;
+  display: inline-block;
+  width: 22px;
+  text-align: right;
+  margin: 0;
+  font-size: 12px;
+  font-family: Gilroy, sans-serif;
+  line-height: 35px;
+  vertical-align: top;
+}
+
 .tec_filter_active_icon {
   display: inline-block;
   width: 10px;
   height: 10px;
-  background: #e3e3e3;
+  background: #8ac353;
   border-radius: 60px;
-  margin-left: 3px;
-  flex-shrink: 0;
+  vertical-align: middle;
+  margin-left: 2px;
 }
 
 .tec_filter_single_clear_box.faded .tec_filter_active_icon {
@@ -745,8 +796,34 @@
   margin-left: 3px;
 }
 
+.tec_filter_single_clear_icon {
+  color: #fff;
+  background: #fff;
+  width: 15px;
+  height: 15px;
+  text-decoration: none !important;
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.tec_filter_single_clear_icon svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
 .fc_box { display: none; }
-.fc_box.open_filter { display: block; padding: 4px 0 8px; }
+.fc_box.open_filter {
+  display: block;
+  position: relative;
+  padding: 4px 0 8px;
+  border-bottom: 1px solid #dcdcdc;
+}
 .fc_box ul { padding-left: 0; list-style: none; margin-bottom: 0; }
 .fc_box li { display: block; padding: 3px 4px; }
 
@@ -780,20 +857,127 @@
 }
 
 .coll-price-range {
+  display: none;
+}
+
+/* ── Price filter (theme: fitting-room-lite.js + traditional-styles.css) ── */
+#filter_Price.open_filter {
+  padding: 20px 15px;
+  border-bottom: 1px solid #dcdcdc;
+}
+
+#fr_price_slider {
+  max-width: 253px;
+  margin: 15px auto 20px;
+}
+
+.fr_range_lbl {
+  display: flex;
+  justify-content: center;
+  margin: 0 -15px;
+}
+
+.fr_range_lbl p {
+  margin-bottom: 0;
+  padding-right: 3%;
+}
+
+.fr_range_lbl p span {
+  display: block;
+  text-align: center;
   font-size: 13px;
-  color: #555;
-  padding: 4px 6px;
   font-family: Gilroy, sans-serif;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.fr_range_lbl p:last-child {
+  padding: 0 0 0 3%;
+}
+
+.fr_range_lbl input {
+  width: 55px;
+  display: inline-block;
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 4px 2px;
+  font-size: 13px;
+  font-family: Gilroymedium, sans-serif;
+}
+
+.noUi-value-horizontal {
+  transform: translate(-50%, 70%) !important;
+}
+
+.noUi-connect {
+  background: #92c368 !important;
+}
+
+.fr_price_submit_btn_box {
+  padding-top: 20px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.fr_price_submit_btn,
+.clear_filter_link {
+  margin: 0 3px;
+  position: relative;
+  z-index: 500;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  display: inline-block;
+  font-size: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  line-height: 0;
+  text-align: center;
+  font-family: Gilroymedium, sans-serif;
+  cursor: pointer;
+}
+
+.fr_price_submit_btn {
+  margin-right: 10px;
+}
+
+.fr_price_submit_btn.disabled {
+  background: #ccc !important;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .clear_filter_link:hover,
+  .fr_price_submit_btn:not(.disabled):hover {
+    background: #92c368;
+    color: #fff;
+  }
+}
+
+#tec_filter_single_clear_box_price {
+  width: 96px;
+}
+
+#tec_filter_price_total_active {
+  width: 80px;
+  font-size: 12px;
+  margin-left: -12px;
 }
 
 .fr_mat_checkbox {
   z-index: 0;
   position: relative;
-  display: inline-block;
+  display: block;
   color: #333;
   font-family: Gilroymedium, sans-serif;
   font-size: 13px;
   line-height: 1.5;
+  cursor: pointer;
 }
 
 .fr_mat_checkbox > input {
@@ -830,9 +1014,27 @@
   vertical-align: top;
 }
 
+.fr_mat_checkbox > span::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 5px;
+  border: solid 2px transparent;
+  border-right: none;
+  border-top: none;
+  transform: translate(3px, 4px) rotate(-45deg);
+}
+
 .fr_mat_checkbox > input:checked + span::before {
-  border-color: #a89572;
-  background-color: #a89572;
+  border-color: #8ac353;
+  background-color: #8ac353;
+}
+
+.fr_mat_checkbox > input:checked + span::after {
+  border-color: #fff;
 }
 
 /* ── Clear floats ───────────────────────────────────── */
@@ -841,3 +1043,6 @@
   display: table;
   clear: both;
 }
+
+.fc_filter_link_active { color: #a89572 !important; }
+.fc_filter_link_active .fc_filter_color { outline: 2px solid #a89572; }

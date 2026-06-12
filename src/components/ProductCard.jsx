@@ -18,7 +18,7 @@ export default function ProductCard({ product }) {
 
   return (
     <div className={`tec_product_box withoutModel${added ? ' activeproduct' : ''}`} id={`tec_product_box_no_mod_${id}`}>
-      <a href="javascript:void(0);" className="fitting_room_cl_prod_link withoutModel">
+      <a className="fitting_room_cl_prod_link withoutModel">
         <p className="fitting_room_cl_brand_new">{brand}</p>
         <p className="tec_price_text">${Math.trunc(parseFloat(price) || 0)}</p>
         {image

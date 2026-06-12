@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import coreApi from '../api/coreApi';
 import ProductCard from '../components/ProductCard';
 import CollectionSortSelect from '../components/CollectionSortSelect';
+import PriceFilter from '../components/PriceFilter';
 import IframeHeader from '../components/IframeHeader';
 
 const GENDER_TABS = [
-  { label: 'Women',  value: 'f' },
-  { label: 'Women+', value: 'p' },
-  { label: 'Men',    value: 'm' },
+  { label: 'Women',  value: 'f', collection: 'women' },
+  { label: 'Women+', value: 'p', collection: 'plus'  },
+  { label: 'Men',    value: 'm', collection: 'men'   },
 ];
 
 const SORT_OPTIONS = [
@@ -28,36 +29,59 @@ export default function ProductsIframe() {
   const [hasMore, setHasMore]       = useState(true);
   const [sortIdx, setSortIdx]       = useState(0);
   const [search, setSearch]         = useState('');
+  const [filters, setFilters]       = useState({ category: [], sub_cat: [], brand: [], color: [] });
+  const [activePrice, setActivePrice] = useState(null);
   const [openSections, setOpenSections] = useState({
     category: false, itemType: false, brand: false, color: false, price: false,
   });
+  // Effect 1: filter/sort/search/gender changed → reset + fetch page 1
+  useEffect(() => {
+    setProducts([]);
+    setHasMore(true);
+    setPage(1);
+    fetchProducts(1);
+  }, [gender, sortIdx, search, filters, activePrice]);
 
-  useEffect(() => { setProducts([]); setPage(1); setHasMore(true); }, [gender, sortIdx, search]);
-  useEffect(() => { fetchProducts(); }, [gender, page, sortIdx, search]);
+  // Effect 2: Load more only (page > 1)
+  useEffect(() => {
+    if (page === 1) return;
+    fetchProducts(page);
+  }, [page]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (fetchPage) => {
     setLoading(true);
     setError(null);
-    const sort = SORT_OPTIONS[sortIdx];
+    const sort       = SORT_OPTIONS[sortIdx];
+    const tab        = GENDER_TABS.find(t => t.value === gender);
+    const collection = tab?.collection ?? 'women';
     try {
       const { data } = await coreApi.get('search/filter/products', {
-        params: { collection: '', gender, search, sortby: sort.sortby, orderby: sort.orderby, page },
+        params: {
+          collection, gender, fp: false, search,
+          sortby: sort.sortby, orderby: sort.orderby, page: fetchPage,
+          ...(filters.category.length && { category: filters.category }),
+          ...(filters.sub_cat.length  && { sub_cat:  filters.sub_cat  }),
+          ...(filters.brand.length    && { brand:    filters.brand    }),
+          ...(filters.color.length    && { color:    filters.color    }),
+          ...(activePrice             && { price:    `${activePrice[0]}:${activePrice[1]}` }),
+        },
       });
       const items = data.products ?? data.data ?? (Array.isArray(data) ? data : []);
       const all   = items.slice(0, 20);
       const total = data.total_products?.total_products ?? items.length;
-      if (page === 1) {
+      if (fetchPage === 1) {
         setFacets({
           category:    data.category    ?? {},
           sub_cat:     data.sub_cat     ?? {},
           brand:       data.brand       ?? {},
           color:       data.color       ?? {},
           price_range: data.price_range ?? {},
+          slider_price: data.slider_price ?? data.price_range ?? {},
         });
         setTotalCount(total);
       }
-      setHasMore(page * 20 < total);
-      setProducts(prev => page === 1 ? all : [...prev, ...all]);
+      setHasMore(fetchPage * 20 < total);
+      setProducts(prev => fetchPage === 1 ? all : [...prev, ...all]);
     } catch (err) {
       setError(err.response?.data?.message ?? err.message);
     } finally {
@@ -65,8 +89,30 @@ export default function ProductsIframe() {
     }
   };
 
-  const toggle = (key) => setOpenSections(s => ({ ...s, [key]: !s[key] }));
-  const brandCount = Object.keys(facets.brand ?? {}).length;
+  const toggleFilter = (key, value) => {
+    setFilters(prev => {
+      const arr = prev[key];
+      const next = arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
+      return { ...prev, [key]: next };
+    });
+  };
+  const clearFilter    = (key) => setFilters(prev => ({ ...prev, [key]: [] }));
+  const clearAllFilters = () => {
+    setFilters({ category: [], sub_cat: [], brand: [], color: [] });
+    setActivePrice(null);
+  };
+  const applyPrice = (min, max) => setActivePrice([min, max]);
+  const clearPrice = () => setActivePrice(null);
+
+  const toggle = (key) => {
+    setOpenSections(prev => {
+      const next = { category: false, itemType: false, brand: false, color: false, price: false };
+      if (!prev[key]) next[key] = true;
+      return next;
+    });
+  };
+  const brandCount  = Object.keys(facets.brand ?? {}).length;
+  const totalActive = Object.values(filters).reduce((n, a) => n + a.length, 0) + (activePrice ? 1 : 0);
 
   return (
     <div className="iframe-page collection-page">
@@ -97,65 +143,69 @@ export default function ProductsIframe() {
             <div className="tec_side_filter_container">
               <div className="flex">
                 <h2 className="tec_side_filter_heading">
-                  Filter <span>{totalCount > 0 ? totalCount : ''}</span> items
+                  Filter{' '}
+                  <span className="tec_side_filter_item_count">{totalCount > 0 ? totalCount : ''}</span>
+                  {' '}items
                 </h2>
+                {totalActive > 0 && (
+                  <a href="javascript:;" className="clear_all_fltr" onClick={clearAllFilters}>
+                    Clear All
+                    <FilterClearIcon />
+                  </a>
+                )}
               </div>
 
-              <FilterSection label="CATEGORY" open={openSections.category} onToggle={() => toggle('category')}>
+              <FilterSection label="CATEGORY" open={openSections.category} onToggle={() => toggle('category')}
+                activeCount={filters.category.length} onClear={() => clearFilter('category')}>
                 <ul>
                   {Object.entries(facets.category ?? {}).map(([k, v]) => (
                     <li key={k}>
-                      <a href="javascript:void(0);" className="fc_filter_link">
-                        <label className="fr_mat_checkbox">
-                          <input type="checkbox" readOnly />
-                          <span>{k}<span className="fc_filter_num">({v})</span></span>
-                        </label>
-                      </a>
+                      <label className="fc_filter_link fr_mat_checkbox">
+                        <input type="checkbox" checked={filters.category.includes(k)} onChange={() => toggleFilter('category', k)} />
+                        <span>{k}<span className="fc_filter_num">({v})</span></span>
+                      </label>
                     </li>
                   ))}
                 </ul>
               </FilterSection>
 
-              <FilterSection label="ITEM TYPE" open={openSections.itemType} onToggle={() => toggle('itemType')}>
+              <FilterSection label="ITEM TYPE" open={openSections.itemType} onToggle={() => toggle('itemType')}
+                activeCount={filters.sub_cat.length} onClear={() => clearFilter('sub_cat')}>
                 <ul>
                   {Object.entries(facets.sub_cat ?? {}).map(([k, v]) => (
                     <li key={k}>
-                      <a href="javascript:void(0);" className="fc_filter_link">
-                        <label className="fr_mat_checkbox">
-                          <input type="checkbox" readOnly />
-                          <span>{k}<span className="fc_filter_num">({v})</span></span>
-                        </label>
-                      </a>
+                      <label className="fc_filter_link fr_mat_checkbox">
+                        <input type="checkbox" checked={filters.sub_cat.includes(k)} onChange={() => toggleFilter('sub_cat', k)} />
+                        <span>{k}<span className="fc_filter_num">({v})</span></span>
+                      </label>
                     </li>
                   ))}
                 </ul>
               </FilterSection>
 
-              <FilterSection
-                label="BRAND"
-                badge={brandCount > 0 ? brandCount : null}
-                open={openSections.brand}
-                onToggle={() => toggle('brand')}
-              >
+              <FilterSection label="BRAND" badge={brandCount > 0 ? brandCount : null}
+                open={openSections.brand} onToggle={() => toggle('brand')}
+                activeCount={filters.brand.length} onClear={() => clearFilter('brand')}>
                 <ul>
                   {Object.entries(facets.brand ?? {}).map(([k, v]) => (
                     <li key={k}>
-                      <a href="javascript:void(0);" className="fc_filter_link">
-                        <label className="fr_mat_checkbox">
-                          <input type="checkbox" readOnly />
-                          <span>{k}<span className="fc_filter_num">({v})</span></span>
-                        </label>
-                      </a>
+                      <label className="fc_filter_link fr_mat_checkbox">
+                        <input type="checkbox" checked={filters.brand.includes(k)} onChange={() => toggleFilter('brand', k)} />
+                        <span>{k}<span className="fc_filter_num">({v})</span></span>
+                      </label>
                     </li>
                   ))}
                 </ul>
               </FilterSection>
 
-              <FilterSection label="COLOR" open={openSections.color} onToggle={() => toggle('color')}>
+              <FilterSection label="COLOR" open={openSections.color} onToggle={() => toggle('color')}
+                activeCount={filters.color.length} onClear={() => clearFilter('color')}>
                 <ul>
                   {Object.entries(facets.color ?? {}).map(([k, v]) => (
                     <li key={k}>
-                      <a href="javascript:void(0);" className="fc_filter_link">
+                      <a
+                        className={`fc_filter_link${filters.color.includes(k) ? ' fc_filter_link_active' : ''}`}
+                        onClick={() => toggleFilter('color', k)}>
                         <span className="fc_filter_color" style={{ background: k }} />
                         {k}<span className="fc_filter_num"> ({v})</span>
                       </a>
@@ -164,11 +214,20 @@ export default function ProductsIframe() {
                 </ul>
               </FilterSection>
 
-              <FilterSection label="PRICE" open={openSections.price} onToggle={() => toggle('price')}>
+              <FilterSection label="PRICE" open={openSections.price} onToggle={() => toggle('price')}
+                activeCount={activePrice ? 1 : 0}
+                activeLabel={activePrice ? `${activePrice[0]}-${activePrice[1]}` : null}
+                priceFilter
+                onClear={clearPrice}>
                 {facets.price_range?.min_price != null && (
-                  <div className="coll-price-range">
-                    ${facets.price_range.min_price} – ${facets.price_range.max_price}
-                  </div>
+                  <PriceFilter
+                    open={openSections.price}
+                    priceRange={facets.price_range}
+                    sliderRange={facets.slider_price}
+                    activePrice={activePrice}
+                    onApply={applyPrice}
+                    onClear={clearPrice}
+                  />
                 )}
               </FilterSection>
             </div>
@@ -183,7 +242,6 @@ export default function ProductsIframe() {
                 {GENDER_TABS.map(t => (
                   <a
                     key={t.value}
-                    href="javascript:void(0);"
                     className={gender === t.value ? 'active' : ''}
                     onClick={() => setGender(t.value)}
                   >
@@ -239,15 +297,53 @@ export default function ProductsIframe() {
   );
 }
 
-function FilterSection({ label, badge, open, onToggle, children }) {
+function FilterClearIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" viewBox="0 0 15 15" xmlSpace="preserve">
+      <path d="M7.5 1.27c3.42 0 6.2 2.8 6.2 6.23s-2.78 6.23-6.2 6.23-6.2-2.8-6.2-6.23 2.78-6.23 6.2-6.23m0-1C3.52.27.3 3.51.3 7.5s3.23 7.23 7.2 7.23 7.2-3.24 7.2-7.23S11.48.27 7.5.27z" />
+      <path d="M4.42 9.66 6.6 7.48 4.44 5.32l.9-.91L7.5 6.59l2.16-2.17.92.92-2.16 2.15 2.16 2.17-.9.91L7.51 8.4l-2.17 2.18-.92-.92z" fill="#010101" />
+    </svg>
+  );
+}
+
+function FilterSection({ label, badge, open, onToggle, activeCount = 0, activeLabel, priceFilter, onClear, children }) {
+  const showBrandTotal = badge != null && activeCount === 0;
+  const showActive = activeCount > 0;
+  const displayActive = activeLabel ?? activeCount;
+
   return (
     <div className="tec_filter_single_filter_box">
-      {badge != null && (
+      {showBrandTotal && (
         <div className="tec_filter_single_clear_box faded" style={{ display: 'block' }}>
           <div className="box">
             <p className="txt" id="totalBrandsCount">{badge} TOTAL</p>
             <div className="tec_filter_active_icon" />
           </div>
+        </div>
+      )}
+      {showActive && (
+        <div
+          className="tec_filter_single_clear_box"
+          id={priceFilter ? 'tec_filter_single_clear_box_price' : undefined}
+          style={{ display: 'block' }}
+        >
+          <div className="tec_filter_total_active_box">
+            <p
+              className="tec_filter_total_active_text"
+              id={priceFilter ? 'tec_filter_price_total_active' : undefined}
+            >
+              {displayActive}
+            </p>
+            <div className="tec_filter_active_icon" />
+          </div>
+          <button
+            type="button"
+            className="tec_filter_cat_clear_link tec_filter_single_clear_icon"
+            onClick={e => { e.stopPropagation(); onClear?.(); }}
+            aria-label={`Clear ${label} filter`}
+          >
+            <FilterClearIcon />
+          </button>
         </div>
       )}
       <a
@@ -257,7 +353,7 @@ function FilterSection({ label, badge, open, onToggle, children }) {
         {label}
         <span className="tec_filter_caret caret" />
       </a>
-      <div className={`fc_box${open ? ' open_filter' : ''}`}>
+      <div className={`fc_box${priceFilter ? ' Price' : ''}${open ? ' open_filter' : ''}`} id={priceFilter ? 'filter_Price' : undefined}>
         {children}
       </div>
     </div>
