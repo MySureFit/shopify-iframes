@@ -4,8 +4,10 @@
 .tec_header {
   height: 60px;
   border-bottom: 1px solid #dcdcdc;
-  margin-left: 25px;
-  margin-right: 23px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 25px;
+  padding-right: 23px;
   font-family: Gilroy, sans-serif;
   z-index: 1200;
   background: #fff;
