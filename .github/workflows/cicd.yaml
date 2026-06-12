@@ -1,0 +1,20 @@
+name: CI/CD Pull and Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pull-code-and-build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+
+      - name: Pull code from main Branch
+        run: |
+          cd /var/www/mysurefit-iframes.com
+          git pull origin main
+          #         pm2 restart 0
