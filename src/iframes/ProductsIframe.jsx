@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import coreApi from '../api/coreApi';
 import ProductCard from '../components/ProductCard';
 import CollectionSortSelect from '../components/CollectionSortSelect';
@@ -12,35 +13,52 @@ const GENDER_TABS = [
 ];
 
 const SORT_OPTIONS = [
-  { label: 'Date, new to old', sortby: 'date',   orderby: 'desc' },
+  { label: 'Date, new to old',   sortby: 'date',  orderby: 'desc' },
   { label: 'Price, high to low', sortby: 'price', orderby: 'desc' },
-  { label: 'Price, low to high', sortby: 'price', orderby: 'asc' },
-  { label: 'Date, old to new', sortby: 'date',   orderby: 'asc' },
+  { label: 'Price, low to high', sortby: 'price', orderby: 'asc'  },
+  { label: 'Date, old to new',   sortby: 'date',  orderby: 'asc'  },
 ];
 
 export default function ProductsIframe() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Ephemeral pagination/result state
   const [products, setProducts]     = useState([]);
   const [facets, setFacets]         = useState({});
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
-  const [gender, setGender]         = useState('f');
   const [page, setPage]             = useState(1);
   const [hasMore, setHasMore]       = useState(true);
-  const [sortIdx, setSortIdx]       = useState(0);
-  const [search, setSearch]         = useState('');
-  const [filters, setFilters]       = useState({ category: [], sub_cat: [], brand: [], color: [] });
-  const [activePrice, setActivePrice] = useState(null);
   const [openSections, setOpenSections] = useState({
     category: false, itemType: false, brand: false, color: false, price: false,
   });
-  // Effect 1: filter/sort/search/gender changed → reset + fetch page 1
+
+  // Local search input state — only committed to URL on Enter/blur
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('search') ?? '');
+
+  // Filter state derived from URL
+  const gender   = searchParams.get('gender')  ?? 'f';
+  const sortby   = searchParams.get('sortby')  ?? 'date';
+  const orderby  = searchParams.get('orderby') ?? 'desc';
+  const search   = searchParams.get('search')  ?? '';
+  const sortIdx  = Math.max(0, SORT_OPTIONS.findIndex(o => o.sortby === sortby && o.orderby === orderby));
+  const filters  = {
+    category: searchParams.getAll('category'),
+    sub_cat:  searchParams.getAll('sub_cat'),
+    brand:    searchParams.getAll('brand'),
+    color:    searchParams.getAll('color'),
+  };
+  const priceStr    = searchParams.get('price');
+  const activePrice = priceStr ? priceStr.split(':').map(Number) : null;
+
+  // Effect 1: URL changed → reset + fetch page 1
   useEffect(() => {
     setProducts([]);
     setHasMore(true);
     setPage(1);
     fetchProducts(1);
-  }, [gender, sortIdx, search, filters, activePrice]);
+  }, [searchParams]);
 
   // Effect 2: Load more only (page > 1)
   useEffect(() => {
@@ -51,19 +69,24 @@ export default function ProductsIframe() {
   const fetchProducts = async (fetchPage) => {
     setLoading(true);
     setError(null);
-    const sort       = SORT_OPTIONS[sortIdx];
+    const sort       = SORT_OPTIONS[Math.max(0, SORT_OPTIONS.findIndex(o => o.sortby === sortby && o.orderby === orderby))];
     const tab        = GENDER_TABS.find(t => t.value === gender);
     const collection = tab?.collection ?? 'women';
+    const cats   = searchParams.getAll('category');
+    const subcat = searchParams.getAll('sub_cat');
+    const brands = searchParams.getAll('brand');
+    const colors = searchParams.getAll('color');
+    const price  = searchParams.get('price');
     try {
       const { data } = await coreApi.get('search/filter/products', {
         params: {
           collection, gender, fp: false, search,
           sortby: sort.sortby, orderby: sort.orderby, page: fetchPage,
-          ...(filters.category.length && { category: filters.category }),
-          ...(filters.sub_cat.length  && { sub_cat:  filters.sub_cat  }),
-          ...(filters.brand.length    && { brand:    filters.brand    }),
-          ...(filters.color.length    && { color:    filters.color    }),
-          ...(activePrice             && { price:    `${activePrice[0]}:${activePrice[1]}` }),
+          ...(cats.length   && { category: cats   }),
+          ...(subcat.length && { sub_cat:  subcat }),
+          ...(brands.length && { brand:    brands }),
+          ...(colors.length && { color:    colors }),
+          ...(price         && { price              }),
         },
       });
       const items = data.products ?? data.data ?? (Array.isArray(data) ? data : []);
@@ -89,20 +112,58 @@ export default function ProductsIframe() {
     }
   };
 
+  // URL mutation helpers
+  const setParam = (key, value) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (value == null || value === '') next.delete(key);
+      else next.set(key, String(value));
+      return next;
+    }, { replace: true });
+  };
+
   const toggleFilter = (key, value) => {
-    setFilters(prev => {
-      const arr = prev[key];
-      const next = arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
-      return { ...prev, [key]: next };
-    });
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      const vals = next.getAll(key);
+      next.delete(key);
+      (vals.includes(value) ? vals.filter(v => v !== value) : [...vals, value])
+        .forEach(v => next.append(key, v));
+      return next;
+    }, { replace: true });
   };
-  const clearFilter    = (key) => setFilters(prev => ({ ...prev, [key]: [] }));
+
+  const clearFilter = (key) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete(key);
+      return next;
+    }, { replace: true });
+  };
+
   const clearAllFilters = () => {
-    setFilters({ category: [], sub_cat: [], brand: [], color: [] });
-    setActivePrice(null);
+    setSearchParams(prev => {
+      const next = new URLSearchParams();
+      ['gender', 'sortby', 'orderby', 'search'].forEach(k => {
+        const v = prev.get(k);
+        if (v) next.set(k, v);
+      });
+      return next;
+    }, { replace: true });
+    setSearchInput('');
   };
-  const applyPrice = (min, max) => setActivePrice([min, max]);
-  const clearPrice = () => setActivePrice(null);
+
+  const applyPrice = (min, max) => setParam('price', `${min}:${max}`);
+  const clearPrice = () => clearFilter('price');
+
+  const commitSearch = () => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (searchInput) next.set('search', searchInput);
+      else next.delete('search');
+      return next;
+    }, { replace: true });
+  };
 
   const toggle = (key) => {
     setOpenSections(prev => {
@@ -111,6 +172,7 @@ export default function ProductsIframe() {
       return next;
     });
   };
+
   const brandCount  = Object.keys(facets.brand ?? {}).length;
   const totalActive = Object.values(filters).reduce((n, a) => n + a.length, 0) + (activePrice ? 1 : 0);
 
@@ -122,17 +184,18 @@ export default function ProductsIframe() {
         {/* ── Sidebar ── */}
         <div className="tec_search_filter_box">
           <div className="tec_side_search_box">
-            <form className="fr_qs_form" onSubmit={e => e.preventDefault()}>
+            <form className="fr_qs_form" onSubmit={e => { e.preventDefault(); commitSearch(); }}>
               <div className="fr_qs_input_box">
                 <input
                   id="fr_search_box"
                   type="search"
                   className="fr_search_input"
                   placeholder="Search..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)}
+                  onBlur={commitSearch}
                 />
-                <button className="fr_qs_input_btn" type="button" tabIndex={-1}>
+                <button className="fr_qs_input_btn" type="submit" tabIndex={-1}>
                   <img src="/assets/search.svg" alt="" />
                 </button>
               </div>
@@ -148,7 +211,7 @@ export default function ProductsIframe() {
                   {' '}items
                 </h2>
                 {totalActive > 0 && (
-                  <a href="javascript:;" className="clear_all_fltr" onClick={clearAllFilters}>
+                  <a className="clear_all_fltr" onClick={clearAllFilters}>
                     Clear All
                     <FilterClearIcon />
                   </a>
@@ -243,7 +306,7 @@ export default function ProductsIframe() {
                   <a
                     key={t.value}
                     className={gender === t.value ? 'active' : ''}
-                    onClick={() => setGender(t.value)}
+                    onClick={() => setParam('gender', t.value)}
                   >
                     {t.label}
                   </a>
@@ -254,7 +317,15 @@ export default function ProductsIframe() {
               <CollectionSortSelect
                 options={SORT_OPTIONS}
                 value={sortIdx}
-                onChange={setSortIdx}
+                onChange={(idx) => {
+                  const opt = SORT_OPTIONS[idx];
+                  setSearchParams(prev => {
+                    const next = new URLSearchParams(prev);
+                    next.set('sortby', opt.sortby);
+                    next.set('orderby', opt.orderby);
+                    return next;
+                  }, { replace: true });
+                }}
               />
             </div>
           </div>
