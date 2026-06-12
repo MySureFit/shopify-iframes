@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import syncApi from '../api/syncApi';
 import coreApi from '../api/coreApi';
+import { useAuth } from './AuthContext';
 
 const FittingRoomContext = createContext(null);
 const LS_KEY = 'ss_fr';
@@ -21,6 +22,7 @@ const LAYER_Z = { 0:4,1:5,2:6,3:7,4:8,5:9,6:10,7:11,8:12,9:13 };
 export const getLayerZ = (layerName) => LAYER_Z[parseInt(layerName)] ?? 8;
 
 export function FittingRoomProvider({ children }) {
+  const { token } = useAuth();
   const [state, setStateRaw] = useState(readLS);
 
   // Sync from other iframes via storage events (fires in all frames EXCEPT the one that wrote)
@@ -45,6 +47,28 @@ export function FittingRoomProvider({ children }) {
   const { products, currentModel, allModels } = state;
   const [isLoadingModels, setLoadingModels] = useState(false);
   const [isLoadingMorph,  setLoadingMorph]  = useState(false);
+
+  // Load fitting room products from server whenever a session token is available
+  useEffect(() => {
+    if (!token) return;
+    const load = async () => {
+      try {
+        const { data } = await syncApi.get('fitting_room/get_fittingroom_products/');
+        const items = data.products ?? data.data ?? (Array.isArray(data) ? data : []);
+        const mapped = items.map(item => ({
+          v3_product_id:      item.v3_product_id ?? item.product_id,
+          shopify_product_id: item.shopify_product_id,
+          detail:             null,
+          selectedColorId:    item.color_id ?? null,
+          morphedImage:       null,
+        }));
+        setState(prev => ({ ...prev, products: mapped }));
+      } catch (err) {
+        console.error('loadFittingRoom:', err);
+      }
+    };
+    load();
+  }, [token]);
 
   const isInFittingRoom = useCallback(
     (v3Id) => products.some((p) => p.v3_product_id === v3Id),
