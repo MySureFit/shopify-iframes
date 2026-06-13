@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
-  const { login, isAuthenticated, loading, error } = useAuth();
+  const { login, isLoggedIn, loading, error } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/', { replace: true });
-  }, [isAuthenticated]);
+    if (isLoggedIn) navigate('/', { replace: true });
+  }, [isLoggedIn]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

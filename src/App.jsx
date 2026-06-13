@@ -14,8 +14,9 @@ import CollectionPage  from './pages/CollectionPage';
 import FittingRoomPage from './pages/FittingRoomPage';
 
 function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  const { isLoggedIn, sessionReady } = useAuth();
+  if (!sessionReady) return null;
+  return isLoggedIn ? children : <Navigate to="/login" replace />;
 }
 
 function Layout() {

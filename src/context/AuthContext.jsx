@@ -4,6 +4,7 @@ import syncApi from '../api/syncApi';
 const AuthContext   = createContext(null);
 const LS_TOKEN_KEY  = 'ss_auth_token';
 const LS_FR_USER_ID = 'ss_fr_user_id';
+const LS_USER_KEY   = 'ss_user';
 
 // Paste the full response from GET /sync/session/create?fr_user_id=... here.
 // Replace with a real backend call when the app is installed on a Shopify store.
@@ -15,7 +16,9 @@ const MOCK_SESSION_RESPONSE = {
 
 export function AuthProvider({ children }) {
   const [token, setToken]           = useState(() => localStorage.getItem(LS_TOKEN_KEY));
-  const [user, setUser]             = useState(null);
+  const [user, setUser]             = useState(() => {
+    try { return JSON.parse(localStorage.getItem(LS_USER_KEY)) ?? null; } catch { return null; }
+  });
   const [sessionReady, setSessionReady] = useState(false);
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
@@ -68,7 +71,9 @@ export function AuthProvider({ children }) {
       if (!authToken) throw new Error('No token received');
       localStorage.setItem(LS_TOKEN_KEY, authToken);
       setToken(authToken);
-      setUser(data.user ?? data.data?.user ?? null);
+      const loggedInUser = data.user ?? data.data?.user ?? { email };
+      localStorage.setItem(LS_USER_KEY, JSON.stringify(loggedInUser));
+      setUser(loggedInUser);
       return true;
     } catch (err) {
       setError(err.response?.data?.message ?? err.message ?? 'Login failed');
@@ -80,6 +85,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem(LS_TOKEN_KEY);
+    localStorage.removeItem(LS_USER_KEY);
     localStorage.removeItem('ss_fr');
     setToken(null);
     setUser(null);
@@ -89,6 +95,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       token, user,
       isAuthenticated: !!token,
+      isLoggedIn: !!user,
       sessionReady,
       login, logout,
       loading, error,
