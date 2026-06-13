@@ -20,8 +20,12 @@ function writeLS(next) {
 }
 
 // Map integer layer_name (0–9) to CSS z-index
-const LAYER_Z = { 0:4,1:5,2:6,3:7,4:8,5:9,6:10,7:11,8:12,9:13 };
-export const getLayerZ = (layerName) => LAYER_Z[parseInt(layerName)] ?? 8;
+// default_bottom=2, layers 0-3=4-7, default_top=8 (between 3 and 4), layers 4-9=9-14
+const LAYER_Z = { 0:4,1:5,2:6,3:7,4:9,5:10,6:11,7:12,8:13,9:14 };
+export const getLayerZ = (layerName) => LAYER_Z[parseInt(layerName)] ?? 9;
+
+const BOTTOM_LAYERS = new Set([1, 3]);
+const TOP_LAYERS    = new Set([2, 4, 5, 6, 7, 8, 9]);
 
 export function FittingRoomProvider({ children }) {
   const { token } = useAuth();
@@ -59,35 +63,54 @@ export function FittingRoomProvider({ children }) {
     const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
     const load = async () => {
       try {
-        const { data } = await syncApi.get(`fitting_room/get_fittingroom_products/${frUserId}`);
-        const items = data.products ?? data.data ?? (Array.isArray(data) ? data : []);
-        const mapped = items.map(item => ({
-          v3_product_id:      item.v3_product_id ?? item.product_id,
-          z_global_id:        item.z_global_id ?? item.v3_product_id ?? item.product_id,
-          shopify_product_id: item.shopify_product_id,
-          detail:             null,
-          selectedColorId:    item.color_id ?? null,
-          isTryingOn:         false,
-          morphedImage:       null,
-        }));
+        const { data } = await coreApi.get('search/filter/products', {
+          params: { collection: 'fitting-room', fr_user_id: frUserId },
+        });
+        const variants = data.data ?? data.products ?? (Array.isArray(data) ? data : []);
+
+        // Group flat variant list by shopify_product_id → one product entry per unique product
+        const productMap = {};
+        for (const v of variants) {
+          const key = v.shopify_product_id;
+          if (!productMap[key]) {
+            // Extract layer_name from shopify_tags (e.g. "layer_number:3")
+            const layerMatch = v.shopify_tags?.match(/layer_number:(\d+)/);
+            const layerName  = layerMatch ? parseInt(layerMatch[1]) : null;
+            const target     = BOTTOM_LAYERS.has(layerName) ? 'bottom'
+                             : TOP_LAYERS.has(layerName)    ? 'top'
+                             : '';
+            productMap[key] = {
+              v3_product_id:      v.shopify_product_id,
+              z_global_id:        v.product_id,
+              shopify_product_id: v.shopify_product_id,
+              detail: {
+                vendor:     v.shopify_vendor ?? v.brand_name,
+                brand_name: v.brand_name,
+                title:      v.shopify_title ?? v.product_name,
+                price:      v.item_price,
+                image_src:  v.image_src,
+                layer_name: layerName,
+                target,
+                items:      [],
+              },
+              selectedColorId: v.color_id ?? null,
+              isTryingOn:      false,
+              morphedImage:    null,
+            };
+          }
+          productMap[key].detail.items.push({
+            color_id:   v.color_id,
+            color_name: v.color_title ?? v.shopify_color_title,
+            item_id:    v.item_id,
+            size_label: v.size_title ?? v.shopify_size_title,
+            size_id:    v.size_id,
+            image:      v.image_src,
+          });
+        }
+
+        const mapped = Object.values(productMap);
         setState(prev => ({ ...prev, products: mapped }));
         setProductsServerLoaded(true);
-
-        // Fetch product details in parallel (non-blocking for morph)
-        if (mapped.length > 0) {
-          const results = await Promise.allSettled(
-            mapped.map(p => syncApi.get(`shopify/product_detail_shopv3/${p.z_global_id}`))
-          );
-          setState(prev => ({
-            ...prev,
-            products: prev.products.map((p, i) => {
-              const r = results[i];
-              if (r?.status !== 'fulfilled') return p;
-              const detail = r.value.data.data ?? r.value.data;
-              return { ...p, detail, selectedColorId: detail?.items?.[0]?.color_id ?? p.selectedColorId };
-            }),
-          }));
-        }
       } catch (err) {
         console.error('loadFittingRoom:', err);
         setProductsServerLoaded(true);

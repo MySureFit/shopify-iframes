@@ -1,13 +1,12 @@
 import { getLayerZ } from '../context/FittingRoomContext';
 
-// A product targets 'top'/'dress'/'jacket' → hide default top layer
-// A product targets 'bottom'/'pants'        → hide default bottom layer
-const TOP_TARGETS    = new Set(['top', 'dress', 'jacket', 'blouse', 'shirt']);
-const BOTTOM_TARGETS = new Set(['bottom', 'pants', 'skirt', 'shorts', 'jeans']);
+// Theme layer classification: layers 1,3 = bottom; 2,4-9 = top
+const BOTTOM_LAYERS = new Set([1, 3]);
+const TOP_LAYERS    = new Set([2, 4, 5, 6, 7, 8, 9]);
 
 export default function FittingRoomViewer({ model, products, isLoading }) {
-  const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_TARGETS.has(p.detail?.target ?? ''));
-  const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_TARGETS.has(p.detail?.target ?? ''));
+  const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_LAYERS.has(p.detail?.layer_name));
+  const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_LAYERS.has(p.detail?.layer_name));
 
   if (!model) {
     return (
@@ -31,7 +30,7 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
           />
         )}
 
-        {/* Layer 2 — default bottom (hidden when a bottom product is selected) */}
+        {/* default_bottom — behind all product layers (z:2) */}
         {!hasBottomProduct && model.default_bottom && (
           <img
             src={model.default_bottom}
@@ -41,13 +40,13 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
           />
         )}
 
-        {/* Layer 3 — default top (hidden when a top/dress product is selected) */}
+        {/* default_top — sits between layer 3 (z:7) and layer 4 (z:9), matching theme stacking */}
         {!hasTopProduct && model.default_top && (
           <img
             src={model.default_top}
             alt=""
             className="layer"
-            style={{ zIndex: 3 }}
+            style={{ zIndex: 8 }}
           />
         )}
 

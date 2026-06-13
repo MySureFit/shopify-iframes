@@ -81,8 +81,6 @@ export default function FittingRoomIframe() {
                       <TrashIcon />
                     </button>
                     <a className="fitting_room_cl_prod_link withoutModel">
-                      <p className="fitting_room_cl_brand_new">{brand}</p>
-                      {price && <p className="tec_price_text">${Math.trunc(parseFloat(price) || 0)}</p>}
                       {thumb
                         ? <img src={thumb} alt={brand} className="tec_product_box_img" loading="lazy" />
                         : <div className="tec_product_box_img tec_product_no_img" />
