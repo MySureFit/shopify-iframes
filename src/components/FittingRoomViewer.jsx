@@ -18,7 +18,7 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
   }
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div className="viewer-wrap">
       <div className="viewer-canvas">
         {/* Layer 1 — naked model base */}
         {model.image_no_cloths && (

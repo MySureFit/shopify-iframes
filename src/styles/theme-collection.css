@@ -46,6 +46,7 @@
   justify-content: flex-end;
   flex: 1;
   min-width: 0;
+  gap: 4px;
 }
 
 #fr_mobile_fr_btn_origin_box {
