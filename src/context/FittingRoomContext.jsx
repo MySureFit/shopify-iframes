@@ -150,11 +150,23 @@ export function FittingRoomProvider({ children }) {
   const selectModel = useCallback(async (modelId) => {
     try {
       await syncApi.post('demomodel/save_model', { selected_model_id: modelId });
+      // Optimistic local update
       setState((prev) => ({
         ...prev,
         currentModel: prev.allModels.find((m) => m.id === modelId) ?? null,
         allModels: prev.allModels.map((m) => ({ ...m, is_selected: m.id === modelId })),
+        modelsLoadedAt: null, // invalidate cache so next view re-fetches
         products: prev.products.map((p) => ({ ...p, morphedImage: null })),
+      }));
+      // Re-fetch from backend to sync is_selected state
+      const { data } = await syncApi.get('demomodel/list_all_models');
+      const models = data.selfie_model ?? data.data ?? [];
+      const selected = models.find((m) => m.is_selected) ?? null;
+      setState((prev) => ({
+        ...prev,
+        allModels: models,
+        currentModel: selected ?? prev.currentModel,
+        modelsLoadedAt: Date.now(),
       }));
     } catch (err) {
       console.error('selectModel:', err);
