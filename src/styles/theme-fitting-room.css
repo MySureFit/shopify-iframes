@@ -89,6 +89,8 @@
 
 .fitting_room_cl_box:hover { border-color: #bbb; }
 
+.fitting_room_cl_box.activeproduct { border-color: #8ac353; border-width: 2px; }
+
 /* Trash button */
 .fitting_room_cl_trash {
   position: absolute;
@@ -244,23 +246,70 @@
 }
 
 .fitting_room_cl_container {
-  border-bottom: 1px solid #efefef;
-  padding: 14px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
 }
+
+/* Outfit card: image left + info right */
+.fr_outfit_item {
+  display: flex;
+  gap: 0;
+}
+
+.fr_outfit_thumb {
+  width: 110px;
+  flex-shrink: 0;
+  background: #f7f7f7;
+}
+
+.fr_outfit_thumb_img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fr_outfit_info {
+  flex: 1;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fr_outfit_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.fr_outfit_header .fitting_room_cl_trash {
+  position: static;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.fr_outfit_header .fitting_room_cl_trash:hover { color: #333; background: transparent; }
 
 .fitting_room_cl_brand {
   font-family: Gilroybold, sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   color: #2c2c2c;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .fitting_room_cl_title {
   font-size: 13px;
   font-family: Gilroymedium, sans-serif;
   color: #555;
-  margin-top: 2px;
-  margin-bottom: 4px;
+  margin: 2px 0 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -268,21 +317,62 @@
 
 .fitting_room_cl_price {
   font-family: Gilroymedium, sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   color: #333;
-  margin-bottom: 10px;
+  margin: 2px 0 0;
 }
 
-.fitting_room_cl_add_cart_box { margin-top: 8px; }
+/* SIZE / COLOR selectors */
+.fr_outfit_selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fr_selector_row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
+
+.fr_selector_label {
+  font-family: Gilroymedium, sans-serif;
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.fr_selector_select {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: Gilroybold, sans-serif;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  appearance: auto;
+}
+
+.fr_outfit_actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
 
 .fitting_room_add_to_cart_btn {
-  width: 100%;
-  padding: 10px;
-  font-size: 13px;
+  flex: 1;
+  padding: 9px;
+  font-size: 12px;
 }
 
 .fr_refresh_btn {
-  margin-top: 20px;
+  margin-top: 12px;
   width: 100%;
   padding: 10px;
   font-size: 13px;

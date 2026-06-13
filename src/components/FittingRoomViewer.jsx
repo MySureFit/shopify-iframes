@@ -6,8 +6,8 @@ const TOP_TARGETS    = new Set(['top', 'dress', 'jacket', 'blouse', 'shirt']);
 const BOTTOM_TARGETS = new Set(['bottom', 'pants', 'skirt', 'shorts', 'jeans']);
 
 export default function FittingRoomViewer({ model, products, isLoading }) {
-  const hasTopProduct    = products.some((p) => TOP_TARGETS.has(p.detail?.target ?? ''));
-  const hasBottomProduct = products.some((p) => BOTTOM_TARGETS.has(p.detail?.target ?? ''));
+  const hasTopProduct    = products.some((p) => p.isTryingOn && TOP_TARGETS.has(p.detail?.target ?? ''));
+  const hasBottomProduct = products.some((p) => p.isTryingOn && BOTTOM_TARGETS.has(p.detail?.target ?? ''));
 
   if (!model) {
     return (
@@ -51,9 +51,9 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
           />
         )}
 
-        {/* Layers 4–13 — morphed product images, stacked by layer_name */}
+        {/* Layers 4–13 — morphed product images for active (isTryingOn) products */}
         {products.map((p) =>
-          p.morphedImage ? (
+          p.isTryingOn && p.morphedImage ? (
             <img
               key={p.v3_product_id}
               src={p.morphedImage}

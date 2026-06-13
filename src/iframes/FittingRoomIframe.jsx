@@ -8,18 +8,21 @@ import FittingRoomViewer from '../components/FittingRoomViewer';
 export default function FittingRoomIframe() {
   const { isAuthenticated } = useAuth();
   const {
-    products, currentModel,
+    products, currentModel, userDetail, favorites,
     isLoadingModels, isLoadingMorph,
-    loadModels, removeProduct, fetchMorphedImages, isModelsStale,
+    loadModels, removeProduct, updateProductColor, toggleTryOn, fetchMorphedImages, isModelsStale,
+    loadUserDetail, loadFavorites,
   } = useFittingRoom();
 
   useEffect(() => {
-    if (isAuthenticated && (!currentModel || isModelsStale)) loadModels();
+    if (!isAuthenticated) return;
+    if (!currentModel || isModelsStale) loadModels();
+    loadUserDetail().then((detail) => {
+      const memberId = detail?.user?.id;
+      if (memberId) loadFavorites(memberId);
+    });
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (currentModel && products.length > 0) fetchMorphedImages();
-  }, [currentModel?.id, products.length]);
 
   if (!isAuthenticated) {
     return (
@@ -62,13 +65,14 @@ export default function FittingRoomIframe() {
               {products.map((p) => {
                 const brand = p.detail?.vendor ?? p.detail?.brand_name ?? '';
                 const price = p.detail?.price ?? p.detail?.item_price ?? '';
-                const thumb = p.detail?.items?.[0]?.image?.low_res
+                const thumb = p.detail?.shopify_image?.src
+                  ?? p.detail?.items?.[0]?.image?.low_res
                   ?? p.detail?.items?.[0]?.image
                   ?? p.detail?.image_src
                   ?? p.detail?.image;
 
                 return (
-                  <li key={p.v3_product_id} className="fitting_room_cl_box">
+                  <li key={p.v3_product_id} className={`fitting_room_cl_box${p.isTryingOn ? ' activeproduct' : ''}`}>
                     <button
                       className="fitting_room_cl_trash"
                       onClick={() => removeProduct(p.v3_product_id)}
@@ -84,8 +88,17 @@ export default function FittingRoomIframe() {
                         : <div className="tec_product_box_img tec_product_no_img" />
                       }
                     </a>
-                    {/* try-on icon — always green since product is in FR */}
-                    <div className="tec_product_box_msf tec_add_msf activeproduct">
+                    {/* try-on icon — toggles per-product active state */}
+                    <div
+                      className={`tec_product_box_msf tec_add_msf${p.isTryingOn ? ' activeproduct' : ''}`}
+                      onClick={() => {
+                        const activating = !p.isTryingOn;
+                        toggleTryOn(p.v3_product_id);
+                        if (activating && !p.morphedImage && currentModel) fetchMorphedImages();
+                      }}
+                      title="Try it on"
+                      style={{ cursor: 'pointer' }}
+                    >
                       <img src="/assets/try-it-on-green.png" className="fr_product_try_btn fr_product_in_fr" alt="" />
                       <img src="/assets/try-it-on.png"       className="fr_product_try_btn" alt="" />
                     </div>
@@ -141,38 +154,94 @@ export default function FittingRoomIframe() {
         <div className="fr_current_items_container">
           <h3 className="fr_headline fr_headline_right">My Current Outfit</h3>
 
-          {products.length === 0 ? (
+          {products.filter(p => p.isTryingOn).length === 0 ? (
             <div className="fr_empty_state" style={{ marginTop: 40 }}>
-              <p style={{ color: '#aaa', fontSize: 13 }}>Add items from the collection.</p>
+              <p style={{ color: '#aaa', fontSize: 13 }}>Click "Try it on" to see your outfit here.</p>
             </div>
           ) : (
             <div className="fr_outfit_list">
-              {products.map((p) => {
+              {products.filter(p => p.isTryingOn).map((p) => {
                 const brand = p.detail?.vendor ?? p.detail?.brand_name ?? '';
                 const title = p.detail?.title ?? p.detail?.name ?? '';
                 const price = p.detail?.price ?? p.detail?.item_price ?? '';
 
+                const selectedItem = p.detail?.items?.find(i => i.color_id === p.selectedColorId)
+                  ?? p.detail?.items?.[0];
+                const thumb = p.detail?.shopify_image?.src
+                  ?? selectedItem?.image?.low_res ?? selectedItem?.image
+                  ?? p.detail?.image_src ?? p.detail?.image;
+
+                // Unique colors
+                const colors = [];
+                const seenColors = new Set();
+                for (const item of p.detail?.items ?? []) {
+                  if (!seenColors.has(item.color_id)) {
+                    seenColors.add(item.color_id);
+                    colors.push({ id: item.color_id, name: item.color_name ?? item.color ?? String(item.color_id) });
+                  }
+                }
+
+                // Sizes for selected color
+                const sizes = (p.detail?.items ?? [])
+                  .filter(i => i.color_id === p.selectedColorId)
+                  .map(i => ({ id: i.item_id ?? i.id, label: i.size_label ?? i.size ?? '' }))
+                  .filter(s => s.label);
+
+                const isFav = favorites.includes(p.v3_product_id);
+
                 return (
                   <div key={p.v3_product_id} className="fitting_room_cl_container">
-                    <div className="fitting_room_cl_price_box">
-                      <p className="fitting_room_cl_brand">{brand}</p>
-                      <p className="fitting_room_cl_title">{title}</p>
-                      {price && (
-                        <p className="fitting_room_cl_price">
-                          ${Math.trunc(parseFloat(price) || 0)}
-                        </p>
+                    <div className="fr_outfit_item">
+                      {thumb && (
+                        <div className="fr_outfit_thumb">
+                          <img src={thumb} alt={brand} className="fr_outfit_thumb_img" />
+                        </div>
                       )}
-                    </div>
-                    <div className="fitting_room_cl_add_cart_box">
-                      <button className="btn_primary fitting_room_add_to_cart_btn">
-                        Add to cart
-                      </button>
+                      <div className="fr_outfit_info">
+                        <div className="fr_outfit_header">
+                          <div>
+                            <p className="fitting_room_cl_brand">{brand}</p>
+                            <p className="fitting_room_cl_title">{title}</p>
+                            {price && <p className="fitting_room_cl_price">${Math.trunc(parseFloat(price) || 0)}</p>}
+                          </div>
+                          <button className="fitting_room_cl_trash" onClick={() => removeProduct(p.v3_product_id)} title="Remove">
+                            <TrashIcon />
+                          </button>
+                        </div>
+
+                        {p.detail && (
+                          <div className="fr_outfit_selectors">
+                            <div className="fr_selector_row">
+                              <span className="fr_selector_label">SIZE:</span>
+                              <select className="fr_selector_select">
+                                <option value="">Select a size</option>
+                                {sizes.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                              </select>
+                            </div>
+                            <div className="fr_selector_row">
+                              <span className="fr_selector_label">COLOR:</span>
+                              <select
+                                className="fr_selector_select"
+                                value={p.selectedColorId ?? ''}
+                                onChange={e => updateProductColor(p.v3_product_id, Number(e.target.value))}
+                              >
+                                {colors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="fr_outfit_actions">
+                          <button className="btn_primary fitting_room_add_to_cart_btn">Add to cart</button>
+                          <HeartIcon filled={isFav} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
               })}
 
-              {products.length > 0 && currentModel && (
+              {products.some(p => p.isTryingOn) && currentModel && (
                 <button
                   className="btn_primary fr_refresh_btn"
                   onClick={fetchMorphedImages}
@@ -201,9 +270,14 @@ function TrashIcon() {
   );
 }
 
-function HeartIcon() {
+function HeartIcon({ filled = false }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+      fill={filled ? '#e74c3c' : 'none'}
+      stroke={filled ? '#e74c3c' : '#aaa'}
+      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      style={{ flexShrink: 0, cursor: 'default' }}
+    >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
