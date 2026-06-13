@@ -5,6 +5,14 @@ const AuthContext   = createContext(null);
 const LS_TOKEN_KEY  = 'ss_auth_token';
 const LS_FR_USER_ID = 'ss_fr_user_id';
 
+// Paste the full response from GET /sync/session/create?fr_user_id=... here.
+// Replace with a real backend call when the app is installed on a Shopify store.
+const MOCK_SESSION_RESPONSE = {
+  auth_token: '3371ad31-f525-219f-121f-3b2d37ee90d0',
+  server_url: 'https://api.mysurefit.co',
+  fr_user_id: '178134466527918561',
+};
+
 export function AuthProvider({ children }) {
   const [token, setToken]           = useState(() => localStorage.getItem(LS_TOKEN_KEY));
   const [user, setUser]             = useState(null);
@@ -12,7 +20,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
 
-  // Bootstrap guest session on mount only when no token exists yet.
+  // Bootstrap session on mount. Uses a hardcoded mock response for now —
+  // replace MOCK_SESSION_RESPONSE with a real backend call when ready.
   useEffect(() => {
     const initSession = async () => {
       const existingToken = localStorage.getItem(LS_TOKEN_KEY);
@@ -21,10 +30,8 @@ export function AuthProvider({ children }) {
         return;
       }
       try {
-        const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
-        const { data } = await syncApi.get('session/create', {
-          params: { fr_user_id: frUserId },
-        });
+        // TODO: replace with real call — await syncApi.get('session/create', { params: { fr_user_id } })
+        const data = MOCK_SESSION_RESPONSE;
         const authToken = data.auth_token ?? data.token;
         if (authToken) {
           localStorage.setItem(LS_TOKEN_KEY, authToken);
