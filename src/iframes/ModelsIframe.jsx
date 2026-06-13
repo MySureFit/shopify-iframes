@@ -158,7 +158,7 @@ export default function ModelsIframe() {
                     <DemoModelCard
                       key={model.id}
                       model={model}
-                      isSelected={currentModel?.id === model.id || model.is_selected}
+                      isSelected={currentModel?.id === model.id}
                       onSelect={handleSelectModel}
                     />
                   ))}

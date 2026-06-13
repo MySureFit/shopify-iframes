@@ -143,6 +143,7 @@ export function FittingRoomProvider({ children }) {
       setState((prev) => ({
         ...prev,
         currentModel: prev.allModels.find((m) => m.id === modelId) ?? null,
+        allModels: prev.allModels.map((m) => ({ ...m, is_selected: m.id === modelId })),
         products: prev.products.map((p) => ({ ...p, morphedImage: null })),
       }));
     } catch (err) {
