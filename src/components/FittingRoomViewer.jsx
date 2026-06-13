@@ -6,8 +6,8 @@ const TOP_TARGETS    = new Set(['top', 'dress', 'jacket', 'blouse', 'shirt']);
 const BOTTOM_TARGETS = new Set(['bottom', 'pants', 'skirt', 'shorts', 'jeans']);
 
 export default function FittingRoomViewer({ model, products, isLoading }) {
-  const hasTopProduct    = products.some((p) => p.isTryingOn && TOP_TARGETS.has(p.detail?.target ?? ''));
-  const hasBottomProduct = products.some((p) => p.isTryingOn && BOTTOM_TARGETS.has(p.detail?.target ?? ''));
+  const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_TARGETS.has(p.detail?.target ?? ''));
+  const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_TARGETS.has(p.detail?.target ?? ''));
 
   if (!model) {
     return (
