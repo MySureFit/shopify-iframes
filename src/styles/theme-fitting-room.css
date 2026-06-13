@@ -1,0 +1,297 @@
+/* Fitting Room iframe — ported from traditional-styles.css */
+
+.fitting-room-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ── Auth wall ─────────────────────────────────────────── */
+.fr-auth-wall {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #888;
+  font-size: 15px;
+}
+
+/* ── Page container (3 columns) ────────────────────────── */
+.fr_page_container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Left: product list ─────────────────────────────────── */
+.fr_products_section {
+  width: 36%;
+  overflow-y: auto;
+  padding: 0 20px 40px;
+  border-right: 1px solid #dcdcdc;
+  flex-shrink: 0;
+}
+
+.fr_products_header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid #dcdcdc;
+  padding: 16px 0 8px;
+  margin-bottom: 16px;
+}
+
+.fr_headline_left {
+  font-family: Gilroybold, sans-serif;
+  font-size: 16px;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.fr_headline_left .green {
+  color: #8ac353;
+}
+
+.fr_continue_shopping {
+  font-family: Gilroy, sans-serif;
+  font-size: 13px;
+  color: #555;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+.fr_continue_shopping:hover { color: #8ac353; text-decoration: none; }
+
+#edit_look_container {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fitting_room_cl_box {
+  position: relative;
+  border: 1px solid #dcdcdc;
+  width: calc(50% - 5px);
+  background: #fff;
+  transition: 0.3s all;
+}
+
+.fitting_room_cl_box:hover { border-color: #bbb; }
+
+/* Trash button */
+.fitting_room_cl_trash {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 200;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #555;
+  transition: 0.2s all;
+  padding: 0;
+}
+
+.fitting_room_cl_trash:hover { background: #000; color: #fff; border-color: #000; }
+
+/* ── Center: model canvas ───────────────────────────────── */
+.fitting_canv_hldr {
+  width: 28%;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid #dcdcdc;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.change-modal-link {
+  position: absolute;
+  right: 12%;
+  top: 8%;
+  z-index: 100;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  line-height: 14px;
+  color: #333;
+  font-family: Gilroymedium, sans-serif;
+  cursor: pointer;
+}
+
+.change-modal-link:hover { color: #8ac353; text-decoration: none; }
+
+.fr_canvas_loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #aaa;
+}
+
+/* Action icons bottom-right of canvas */
+.fr_share_fav_box {
+  position: absolute;
+  z-index: 1030;
+  bottom: 50px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.icon_fitt_room {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.icon_fitt_room:hover { opacity: 1; }
+
+.fr_change_model_icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* FittingRoomViewer fills canvas area */
+.fitting_canv_hldr .viewer-canvas,
+.fitting_canv_hldr > div {
+  width: 100%;
+  height: 100%;
+}
+
+.viewer-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.viewer-loader {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+/* ── Right: current outfit ──────────────────────────────── */
+.fr_current_items_container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 40px;
+}
+
+.fr_headline {
+  border-bottom: 1px solid #dcdcdc;
+  padding: 16px 0 8px;
+  font-family: Gilroymedium, sans-serif;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.fr_headline_right {
+  color: #333;
+}
+
+.fr_outfit_list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.fitting_room_cl_container {
+  border-bottom: 1px solid #efefef;
+  padding: 14px 0;
+}
+
+.fitting_room_cl_brand {
+  font-family: Gilroybold, sans-serif;
+  font-size: 20px;
+  color: #2c2c2c;
+  margin-bottom: 0;
+}
+
+.fitting_room_cl_title {
+  font-size: 13px;
+  font-family: Gilroymedium, sans-serif;
+  color: #555;
+  margin-top: 2px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fitting_room_cl_price {
+  font-family: Gilroymedium, sans-serif;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.fitting_room_cl_add_cart_box { margin-top: 8px; }
+
+.fitting_room_add_to_cart_btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.fr_refresh_btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* ── Empty state ────────────────────────────────────────── */
+.fr_empty_state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #aaa;
+  font-size: 13px;
+}

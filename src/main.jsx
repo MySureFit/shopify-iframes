@@ -4,6 +4,7 @@ import App from './App';
 import './index.css';
 import './styles/theme-collection.css';
 import './styles/theme-models.css';
+import './styles/theme-fitting-room.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />
