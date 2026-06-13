@@ -10,12 +10,20 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout latest code
-        uses: actions/checkout@v4
-
-      - name: Pull code from main Branch
+      - name: Pull latest code
         run: |
           cd /var/www/mysurefit-iframes.com
           git pull origin main
-          #         pm2 restart 0
 
+      - name: Install dependencies
+        run: |
+          cd /var/www/mysurefit-iframes.com
+          npm ci
+
+      - name: Build
+        run: |
+          cd /var/www/mysurefit-iframes.com
+          npm run build
+
+      - name: Reload nginx
+        run: sudo nginx -s reload
