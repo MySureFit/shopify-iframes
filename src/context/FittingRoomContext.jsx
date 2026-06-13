@@ -83,9 +83,13 @@ export function FittingRoomProvider({ children }) {
   );
 
   const addProduct = useCallback(async (v3Id, shopifyId) => {
+    const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
     try {
-      const { data } = await syncApi.get(`shopify/product_detail_shopv3/${v3Id}`);
-      const detail = data.data ?? data;
+      const [detailRes] = await Promise.all([
+        syncApi.get(`shopify/product_detail_shopv3/${v3Id}`),
+        syncApi.post('fitting_room/add_product', { product_id: String(v3Id), fr_user_id: frUserId }),
+      ]);
+      const detail = detailRes.data.data ?? detailRes.data;
       setState((prev) => ({
         ...prev,
         products: [
@@ -98,8 +102,14 @@ export function FittingRoomProvider({ children }) {
     }
   }, [setState]);
 
-  const removeProduct = useCallback((v3Id) => {
+  const removeProduct = useCallback(async (v3Id) => {
+    const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
     setState((prev) => ({ ...prev, products: prev.products.filter((p) => p.v3_product_id !== v3Id) }));
+    try {
+      await syncApi.post('fitting_room/remove_product', { product_id: String(v3Id), fr_user_id: frUserId });
+    } catch (err) {
+      console.error('removeProduct:', err);
+    }
   }, [setState]);
 
   const toggleProduct = useCallback((v3Id, shopifyId) => {
