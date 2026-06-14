@@ -80,7 +80,7 @@ export function FittingRoomProvider({ children }) {
                              : TOP_LAYERS.has(layerName)    ? 'top'
                              : '';
             productMap[key] = {
-              v3_product_id:      v.shopify_product_id,
+              v3_product_id:      v.product_id,
               z_global_id:        v.product_id,
               shopify_product_id: v.shopify_product_id,
               detail: {
