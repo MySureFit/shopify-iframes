@@ -1,103 +1,198 @@
-# SelfieStyler — Progress Brief & Roadmap
-
-**Prepared for:** MySureFit Client  
-**Project:** SelfieStyler Virtual Fitting Room — Shopify Integration
+# SelfieStyler — What Is Built & What Comes Next
 
 ---
 
-## What We Are Building
+## What We Have Built
 
-A **Shopify-embedded virtual fitting room** that lets shoppers try on clothes on a real demo model before buying — directly inside the store, without leaving the page.
+A fully working virtual fitting room application — live at `mysurefit-iframes.com`.
 
-The fitting room is built as a modern React application, hosted independently, and embedded into any Shopify store as lightweight iframes. This approach is the industry standard for complex Shopify integrations and sets the foundation for a full Shopify App Store submission.
+It runs as three independent pages (iframes), each designed to be embedded inside a Shopify store:
 
----
+| Iframe | URL | Purpose |
+|--------|-----|---------|
+| Products | `/iframe/products` | Browse collection, add items to fitting room |
+| Models | `/iframe/models` | Pick a demo model to try clothes on |
+| Fitting Room | `/iframe/fitting-room` | See clothes on the model, manage outfit |
 
-## What Has Been Delivered
+All three are connected — adding a product in the Products iframe instantly appears in the Fitting Room iframe. State is saved so it survives page reloads.
 
-### 1. Product Browsing (Products Iframe)
-- Full collection page with real-time search, filters (category, item type, brand, color, price range), and sorting
-- Powered by the existing SureFit product catalog API
-- Products correctly show "in fitting room" badge after being added — persists across page reloads
-
-### 2. Model Selection (Models Iframe)
-- Grid of demo models with selection
-- Selected model persists and syncs across all three iframes in real time
-
-### 3. Virtual Fitting Room (Fitting Room Iframe)
-- Three-column layout: product shelf, try-on canvas, outfit panel
-- **Layer-aware clothing system** — tops render above bottoms, exactly matching the legacy theme's layer order
-- **Morphed images** — when a shopper clicks "Try it on", the product is composited onto the selected model using the SureFit morphing API
-- Default mannequin clothes are hidden only after the replacement garment loads (no flash of a naked model)
-- Outfit panel on the right shows currently tried-on items with brand, title, price, size and color selectors
-
-### 4. State Sync Across Iframes
-- Adding a product to the fitting room in the Products iframe is instantly reflected in the Fitting Room iframe — no page refresh, no manual sync code
-- State survives browser refreshes
-
-### 5. Infrastructure & DevOps
-- Application is live and deployed at `mysurefit-iframes.com`
-- CI/CD pipeline: every push to `main` automatically builds and deploys to the server
-- Deployment documentation written for the DevOps team
-
-### 6. Security
-- Standalone routes (`/`, `/fitting-room`) are protected behind login
-- Iframes use a session token for API authentication
-- All API calls are proxied server-side — API credentials never exposed to the browser
+**The fitting room works end-to-end:**
+- Shopper browses products → clicks "Try it on" → item is placed on their chosen model → model is shown wearing the item with correct layering (tops over bottoms) → right panel shows the current outfit with size and color selectors
 
 ---
 
-## The Approach — Why It Is Right
+## How a Shopify App Works
 
-### Iframe Architecture
-Rather than injecting complex JavaScript directly into the Shopify theme (the old approach), the fitting room UI lives in its own React application. The Shopify store embeds it as iframes.
+Before explaining next steps, here is what a Shopify App actually is:
 
-**Why this is better:**
-- The fitting room can be updated and deployed without touching the merchant's theme
-- Works on any Shopify theme without custom theme development per merchant
-- Isolates the fitting room from Shopify's Content Security Policy restrictions
-- This is the same pattern used by leading Shopify apps (reviews widgets, loyalty programs, size guides)
+When a merchant installs an app from the Shopify App Store, Shopify gives that app permission to read store data (products, customers, orders). The app can then inject UI blocks into the merchant's storefront — automatically, without the merchant touching any code.
 
-### Built to Scale to a Full Shopify App
-The architecture was designed from day one to become an **official Shopify App** (listed on the Shopify App Store). The iframe UI is already the correct component for this — it does not need to be rebuilt.
+Our goal is to become one of those apps. When a merchant installs SelfieStyler, our fitting room iframes automatically appear on their product and collection pages.
 
 ---
 
-## What Comes Next
-
-### Phase 1 — Session Wiring (Immediate)
-Connect the Shopify customer identity to the fitting room session. Today the session uses a fixed test account. Next, the Shopify theme reads the logged-in customer's ID and passes it to the iframe — each shopper sees their own fitting room.
-
-**Effort:** Small — a few lines of Liquid in the theme + one API call change in the React app.
-
-### Phase 2 — Theme App Extension
-Replace the manually-added iframe snippet with a **Shopify Theme App Extension** — Shopify's official system for injecting UI into storefronts. When a merchant installs the app, the fitting room appears automatically, with no theme editing required.
-
-**Effort:** Medium — new Shopify extension package alongside the existing React app.
-
-### Phase 3 — OAuth Install Flow
-Build the install and callback routes so the app can be installed by any Shopify merchant with one click, the same as any app on the Shopify App Store.
-
-**Effort:** Medium — backend work in `shopify_sync`.
-
-### Phase 4 — App Store Submission
-Once OAuth and the Theme Extension are in place, submit to the Shopify App Store. The React app, the infrastructure, and the CI/CD pipeline are already production-ready.
+## Step-by-Step: What Needs to Happen on Shopify
 
 ---
 
-## Summary
+### Step 1 — Register on Shopify Partners
 
-| Area | Status |
-|------|--------|
-| Product browsing iframe | Done |
-| Model selection iframe | Done |
-| Fitting room try-on iframe | Done |
-| Layer-correct clothing compositing | Done |
-| Cross-iframe real-time sync | Done |
-| CI/CD & deployment infrastructure | Done |
-| Session wiring to real Shopify customer | Next |
-| Theme App Extension | Next |
-| OAuth install flow | Next |
-| Shopify App Store submission | Final milestone |
+**What:** Create a Shopify Partner account and register SelfieStyler as an official app.
 
-The foundation is solid, deployed, and working. The remaining work is integration — connecting what is built to the Shopify merchant and customer identity systems.
+**Where:** partners.shopify.com → Apps → Create App
+
+**What comes out of this:**
+- An **API Key** and **API Secret** — these are the credentials that identify our app to Shopify
+- An install URL that merchants click to install the app
+- A redirect URL where Shopify sends the merchant after they approve the install
+
+**No code needed yet. This is just registration.**
+
+---
+
+### Step 2 — Build the OAuth Install Flow
+
+**What:** When a merchant clicks "Install", Shopify runs an authentication handshake (OAuth). We need two routes in our backend to handle this.
+
+**How it works:**
+
+```
+Merchant clicks Install
+        ↓
+Shopify redirects to:  https://shop-api.mysurefit.co/shopify/install?shop=merchant-store.myshopify.com
+        ↓
+Our backend redirects merchant to Shopify's approval screen
+        ↓
+Merchant clicks "Approve"
+        ↓
+Shopify redirects to:  https://shop-api.mysurefit.co/shopify/callback?code=abc123&shop=merchant-store.myshopify.com
+        ↓
+Our backend exchanges the code for a permanent access_token
+        ↓
+We save:  { shop: "merchant-store.myshopify.com", access_token: "shpat_..." } in our database
+        ↓
+App is installed. Merchant is redirected to a success page.
+```
+
+**Where this code lives:** `shopify_sync` backend — two new routes (`/shopify/install` and `/shopify/callback`). The `auth-shopify.js` file already exists there as a starting point.
+
+**What the access token lets us do:** Read the merchant's products, customers, and orders via Shopify's API.
+
+---
+
+### Step 3 — Build the Theme App Extension
+
+**What:** This is how our fitting room UI gets injected into the merchant's Shopify store automatically, without the merchant editing any theme code.
+
+A Theme App Extension is a small package (built with Shopify CLI) that contains Liquid blocks. Shopify manages deploying these blocks when the app is installed.
+
+**We create three blocks:**
+
+**Block 1 — Products Block** (goes on collection pages)
+```
+Merchant's Collection Page
+└── [SelfieStyler Products Block]
+      └── <iframe src="https://mysurefit-iframes.com/iframe/products?auth_token=...&fr_user_id=...">
+```
+
+**Block 2 — Models Block** (goes anywhere the merchant wants — header, sidebar, modal trigger)
+```
+└── <iframe src="https://mysurefit-iframes.com/iframe/models?auth_token=...&fr_user_id=...">
+```
+
+**Block 3 — Fitting Room Block** (goes on the fitting room collection page or a dedicated page)
+```
+└── <iframe src="https://mysurefit-iframes.com/iframe/fitting-room?auth_token=...&fr_user_id=...">
+```
+
+The merchant places these blocks wherever they want using Shopify's drag-and-drop theme editor. No code. No developer needed on their end.
+
+---
+
+### Step 4 — Connect the Shopify Customer to the Fitting Room (Session Bridge)
+
+**What:** This is the link between "who is logged in on Shopify" and "whose fitting room they see". 
+
+Right now the app uses a test account. This step makes each shopper see their own fitting room.
+
+**How it works inside the Theme App Extension:**
+
+```
+1. Shopper visits the store — they are logged into Shopify
+2. Shopify Liquid gives us: {{ customer.id }}  (e.g. 6823491)
+3. Our extension calls:
+      GET https://shop-api.mysurefit.co/sync/session/create?fr_user_id=6823491
+4. We get back:
+      { auth_token: "abc...", fr_user_id: "178134..." }
+5. We build the iframe URL:
+      https://mysurefit-iframes.com/iframe/products?auth_token=abc...&fr_user_id=178134...
+6. Shopper sees their own fitting room
+```
+
+**What changes in our React app:** Instead of using the hardcoded test session, `AuthContext.jsx` reads `auth_token` and `fr_user_id` from the URL params. That is roughly 5 lines of code.
+
+---
+
+### Step 5 — Test on a Real Shopify Store (Development Store)
+
+**What:** Shopify Partners gives you free development stores — test stores where you can install and test your app without a real merchant.
+
+**Process:**
+1. Create a development store in Shopify Partners
+2. Install our app on that store using the install URL from Step 1
+3. Add the Theme Extension blocks to the theme
+4. Log in as a test customer and verify the full flow works end to end
+
+---
+
+### Step 6 — Submit to the Shopify App Store
+
+Once tested on a real store, submit the app for Shopify's review. Shopify reviews the app for security and quality, then publishes it. Merchants can then find and install it directly from the App Store.
+
+---
+
+## The Complete Picture
+
+```
+TODAY                              NEXT                          FUTURE
+─────────────────────────────────────────────────────────────────────────
+
+Iframes built & live           Step 1: Register on            App Store listing
+  /iframe/products      ──►      Shopify Partners      ──►    Any merchant can
+  /iframe/models                                               install with
+  /iframe/fitting-room       Step 2: OAuth install flow        one click
+                               (shopify_sync backend)
+CI/CD pipeline ready
+mysurefit-iframes.com          Step 3: Theme App Extension
+deployed                         (auto-inject iframes)
+
+                               Step 4: Session bridge
+                                 (real customer identity)
+
+                               Step 5: Test on dev store
+```
+
+---
+
+## What the Merchant Experience Looks Like (End Goal)
+
+1. Merchant finds SelfieStyler on the Shopify App Store
+2. Clicks "Add app" → approves permissions → app is installed
+3. Goes to their theme editor → sees SelfieStyler blocks available
+4. Drags the "Fitting Room" block onto their collection page → done
+5. Their shoppers now have a virtual fitting room with zero code
+
+---
+
+## Summary of Remaining Work
+
+| Step | What | Effort |
+|------|------|--------|
+| 1 | Register on Shopify Partners | 1 hour — no code |
+| 2 | OAuth install + callback routes | 2–3 days |
+| 3 | Theme App Extension (3 iframe blocks) | 3–4 days |
+| 4 | Session bridge (connect customer to iframe) | 1 day |
+| 5 | Test on development store | 2–3 days |
+| 6 | App Store submission | Shopify review: 1–2 weeks |
+
+**The fitting room itself is done. Everything remaining is about packaging it as a proper Shopify App so any merchant can install it.**
