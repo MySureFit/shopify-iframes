@@ -179,6 +179,16 @@ export default function FittingRoomIframe() {
     });
   }, [isAuthenticated]);
 
+  // Pre-fetch morphed images for all fitting-room products as soon as model + products are ready.
+  // Mirrors the legacy theme's per-layer pre-loader (lyr_prod_loader_N) — images are ready
+  // before the user clicks try-on, so toggling is instant with no nude flash.
+  useEffect(() => {
+    if (!currentModel || products.length === 0 || isLoadingMorph) return;
+    if (!products.some((p) => !p.morphedImage)) return; // all already fetched
+    fetchMorphedImages();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentModel?.id, products.length]);
+
   if (!isAuthenticated) {
     return (
       <div className="iframe-page fitting-room-page">
