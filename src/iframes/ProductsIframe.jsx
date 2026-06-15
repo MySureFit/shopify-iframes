@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard';
 import CollectionSortSelect from '../components/CollectionSortSelect';
 import PriceFilter from '../components/PriceFilter';
 import IframeHeader from '../components/IframeHeader';
+import MobileCollectionIconBar from '../components/MobileCollectionIconBar';
 
 const GENDER_TABS = [
   { label: 'Women',  value: 'f', collection: 'women' },
@@ -33,6 +34,9 @@ export default function ProductsIframe() {
   const [openSections, setOpenSections] = useState({
     category: false, itemType: false, brand: false, color: false, price: false,
   });
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [mobileActiveIcon, setMobileActiveIcon] = useState('filter');
+  const [focusSearchOnOpen, setFocusSearchOnOpen] = useState(false);
 
   // Local search input state — only committed to URL on Enter/blur
   const [searchInput, setSearchInput] = useState(() => searchParams.get('search') ?? '');
@@ -176,125 +180,70 @@ export default function ProductsIframe() {
   const brandCount  = Object.keys(facets.brand ?? {}).length;
   const totalActive = Object.values(filters).reduce((n, a) => n + a.length, 0) + (activePrice ? 1 : 0);
 
+  const handleSortChange = (idx) => {
+    const opt = SORT_OPTIONS[idx];
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set('sortby', opt.sortby);
+      next.set('orderby', opt.orderby);
+      return next;
+    }, { replace: true });
+  };
+
+  const openFilterModal = (icon = 'filter', focusSearch = false) => {
+    setMobileActiveIcon(icon);
+    setFocusSearchOnOpen(focusSearch);
+    setFilterModalOpen(true);
+  };
+
+  useEffect(() => {
+    if (!filterModalOpen || !focusSearchOnOpen) return;
+    const timer = window.setTimeout(() => {
+      document.querySelector('.collection-filter-modal .fr_search_input')?.focus();
+      setFocusSearchOnOpen(false);
+    }, 100);
+    return () => window.clearTimeout(timer);
+  }, [filterModalOpen, focusSearchOnOpen]);
+
+  const filterPanel = (
+    <CollectionFilterPanel
+      searchInput={searchInput}
+      setSearchInput={setSearchInput}
+      commitSearch={commitSearch}
+      totalCount={totalCount}
+      totalActive={totalActive}
+      clearAllFilters={clearAllFilters}
+      facets={facets}
+      filters={filters}
+      openSections={openSections}
+      toggle={toggle}
+      toggleFilter={toggleFilter}
+      clearFilter={clearFilter}
+      brandCount={brandCount}
+      activePrice={activePrice}
+      applyPrice={applyPrice}
+      clearPrice={clearPrice}
+    />
+  );
+
   return (
-    <div className="iframe-page collection-page">
-      <IframeHeader />
+    <div className="iframe-page collection-page mobile_mode">
+      <IframeHeader
+        mobileIconBar={(
+          <MobileCollectionIconBar
+            totalCount={totalCount}
+            totalActive={totalActive}
+            activeIcon={mobileActiveIcon}
+            onFilterClick={() => openFilterModal('filter')}
+            onSearchClick={() => openFilterModal('search', true)}
+          />
+        )}
+      />
 
       <div className="tec_main_container">
         {/* ── Sidebar ── */}
         <div className="tec_search_filter_box">
-          <div className="tec_side_search_box">
-            <form className="fr_qs_form" onSubmit={e => { e.preventDefault(); commitSearch(); }}>
-              <div className="fr_qs_input_box">
-                <input
-                  id="fr_search_box"
-                  type="search"
-                  className="fr_search_input"
-                  placeholder="Search..."
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  onBlur={commitSearch}
-                />
-                <button className="fr_qs_input_btn" type="submit" tabIndex={-1}>
-                  <img src="/assets/search.svg" alt="" />
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <div id="fr_filter_origin_box">
-            <div className="tec_side_filter_container">
-              <div className="flex">
-                <h2 className="tec_side_filter_heading">
-                  Filter{' '}
-                  <span className="tec_side_filter_item_count">{totalCount > 0 ? totalCount : ''}</span>
-                  {' '}items
-                </h2>
-                {totalActive > 0 && (
-                  <a className="clear_all_fltr" onClick={clearAllFilters}>
-                    Clear All
-                    <FilterClearIcon />
-                  </a>
-                )}
-              </div>
-
-              <FilterSection label="CATEGORY" open={openSections.category} onToggle={() => toggle('category')}
-                activeCount={filters.category.length} onClear={() => clearFilter('category')}>
-                <ul>
-                  {Object.entries(facets.category ?? {}).map(([k, v]) => (
-                    <li key={k}>
-                      <label className="fc_filter_link fr_mat_checkbox">
-                        <input type="checkbox" checked={filters.category.includes(k)} onChange={() => toggleFilter('category', k)} />
-                        <span>{k}<span className="fc_filter_num">({v})</span></span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </FilterSection>
-
-              <FilterSection label="ITEM TYPE" open={openSections.itemType} onToggle={() => toggle('itemType')}
-                activeCount={filters.sub_cat.length} onClear={() => clearFilter('sub_cat')}>
-                <ul>
-                  {Object.entries(facets.sub_cat ?? {}).map(([k, v]) => (
-                    <li key={k}>
-                      <label className="fc_filter_link fr_mat_checkbox">
-                        <input type="checkbox" checked={filters.sub_cat.includes(k)} onChange={() => toggleFilter('sub_cat', k)} />
-                        <span>{k}<span className="fc_filter_num">({v})</span></span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </FilterSection>
-
-              <FilterSection label="BRAND" badge={brandCount > 0 ? brandCount : null}
-                open={openSections.brand} onToggle={() => toggle('brand')}
-                activeCount={filters.brand.length} onClear={() => clearFilter('brand')}>
-                <ul>
-                  {Object.entries(facets.brand ?? {}).map(([k, v]) => (
-                    <li key={k}>
-                      <label className="fc_filter_link fr_mat_checkbox">
-                        <input type="checkbox" checked={filters.brand.includes(k)} onChange={() => toggleFilter('brand', k)} />
-                        <span>{k}<span className="fc_filter_num">({v})</span></span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </FilterSection>
-
-              <FilterSection label="COLOR" open={openSections.color} onToggle={() => toggle('color')}
-                activeCount={filters.color.length} onClear={() => clearFilter('color')}>
-                <ul>
-                  {Object.entries(facets.color ?? {}).map(([k, v]) => (
-                    <li key={k}>
-                      <a
-                        className={`fc_filter_link${filters.color.includes(k) ? ' fc_filter_link_active' : ''}`}
-                        onClick={() => toggleFilter('color', k)}>
-                        <span className="fc_filter_color" style={{ background: k }} />
-                        {k}<span className="fc_filter_num"> ({v})</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </FilterSection>
-
-              <FilterSection label="PRICE" open={openSections.price} onToggle={() => toggle('price')}
-                activeCount={activePrice ? 1 : 0}
-                activeLabel={activePrice ? `${activePrice[0]}-${activePrice[1]}` : null}
-                priceFilter
-                onClear={clearPrice}>
-                {facets.price_range?.min_price != null && (
-                  <PriceFilter
-                    open={openSections.price}
-                    priceRange={facets.price_range}
-                    sliderRange={facets.slider_price}
-                    activePrice={activePrice}
-                    onApply={applyPrice}
-                    onClear={clearPrice}
-                  />
-                )}
-              </FilterSection>
-            </div>
-          </div>
+          {filterPanel}
         </div>
 
         {/* ── Main: header + grid ── */}
@@ -312,20 +261,20 @@ export default function ProductsIframe() {
                   </a>
                 ))}
               </h1>
+              <button
+                type="button"
+                className="tec_filter_open_btn"
+                onClick={() => openFilterModal('filter')}
+              >
+                Filter &amp; Sort
+                <span className="caret" />
+              </button>
             </div>
             <div className="tec_sort_box">
               <CollectionSortSelect
                 options={SORT_OPTIONS}
                 value={sortIdx}
-                onChange={(idx) => {
-                  const opt = SORT_OPTIONS[idx];
-                  setSearchParams(prev => {
-                    const next = new URLSearchParams(prev);
-                    next.set('sortby', opt.sortby);
-                    next.set('orderby', opt.orderby);
-                    return next;
-                  }, { replace: true });
-                }}
+                onChange={handleSortChange}
               />
             </div>
           </div>
@@ -364,7 +313,160 @@ export default function ProductsIframe() {
           )}
         </div>
       </div>
+
+      {filterModalOpen && (
+        <div className="collection-filter-modal" role="dialog" aria-modal="true" aria-label="Filters">
+          <div className="collection-filter-modal__backdrop" onClick={() => setFilterModalOpen(false)} />
+          <div className="collection-filter-modal__panel">
+            <div className="collection-filter-modal__header">
+              <h3>Filters</h3>
+            </div>
+            <div className="collection-filter-modal__body">
+              <div className="collection-filter-modal__sort">
+                <CollectionSortSelect
+                  options={SORT_OPTIONS}
+                  value={sortIdx}
+                  onChange={handleSortChange}
+                />
+              </div>
+              {filterPanel}
+            </div>
+            <div className="collection-filter-modal__footer">
+              <button
+                type="button"
+                className="btn_primary collection-filter-modal__save"
+                onClick={() => setFilterModalOpen(false)}
+              >
+                Save Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function CollectionFilterPanel({
+  searchInput, setSearchInput, commitSearch,
+  totalCount, totalActive, clearAllFilters,
+  facets, filters, openSections, toggle, toggleFilter, clearFilter,
+  brandCount, activePrice, applyPrice, clearPrice,
+}) {
+  return (
+    <>
+      <div className="tec_side_search_box">
+        <form className="fr_qs_form" onSubmit={e => { e.preventDefault(); commitSearch(); }}>
+          <div className="fr_qs_input_box">
+            <input
+              type="search"
+              className="fr_search_input"
+              placeholder="Search..."
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onBlur={commitSearch}
+            />
+            <button className="fr_qs_input_btn" type="submit" tabIndex={-1}>
+              <img src="/assets/search.svg" alt="" />
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="fr_filter_origin_box">
+        <div className="tec_side_filter_container">
+          <div className="flex">
+            <h2 className="tec_side_filter_heading">
+              Filter{' '}
+              <span className="tec_side_filter_item_count">{totalCount > 0 ? totalCount : ''}</span>
+              {' '}items
+            </h2>
+            {totalActive > 0 && (
+              <a className="clear_all_fltr" onClick={clearAllFilters}>
+                Clear All
+                <FilterClearIcon />
+              </a>
+            )}
+          </div>
+
+          <FilterSection label="CATEGORY" open={openSections.category} onToggle={() => toggle('category')}
+            activeCount={filters.category.length} onClear={() => clearFilter('category')}>
+            <ul>
+              {Object.entries(facets.category ?? {}).map(([k, v]) => (
+                <li key={k}>
+                  <label className="fc_filter_link fr_mat_checkbox">
+                    <input type="checkbox" checked={filters.category.includes(k)} onChange={() => toggleFilter('category', k)} />
+                    <span>{k}<span className="fc_filter_num">({v})</span></span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </FilterSection>
+
+          <FilterSection label="ITEM TYPE" open={openSections.itemType} onToggle={() => toggle('itemType')}
+            activeCount={filters.sub_cat.length} onClear={() => clearFilter('sub_cat')}>
+            <ul>
+              {Object.entries(facets.sub_cat ?? {}).map(([k, v]) => (
+                <li key={k}>
+                  <label className="fc_filter_link fr_mat_checkbox">
+                    <input type="checkbox" checked={filters.sub_cat.includes(k)} onChange={() => toggleFilter('sub_cat', k)} />
+                    <span>{k}<span className="fc_filter_num">({v})</span></span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </FilterSection>
+
+          <FilterSection label="BRAND" badge={brandCount > 0 ? brandCount : null}
+            open={openSections.brand} onToggle={() => toggle('brand')}
+            activeCount={filters.brand.length} onClear={() => clearFilter('brand')}>
+            <ul>
+              {Object.entries(facets.brand ?? {}).map(([k, v]) => (
+                <li key={k}>
+                  <label className="fc_filter_link fr_mat_checkbox">
+                    <input type="checkbox" checked={filters.brand.includes(k)} onChange={() => toggleFilter('brand', k)} />
+                    <span>{k}<span className="fc_filter_num">({v})</span></span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </FilterSection>
+
+          <FilterSection label="COLOR" open={openSections.color} onToggle={() => toggle('color')}
+            activeCount={filters.color.length} onClear={() => clearFilter('color')}>
+            <ul>
+              {Object.entries(facets.color ?? {}).map(([k, v]) => (
+                <li key={k}>
+                  <a
+                    className={`fc_filter_link${filters.color.includes(k) ? ' fc_filter_link_active' : ''}`}
+                    onClick={() => toggleFilter('color', k)}>
+                    <span className="fc_filter_color" style={{ background: k }} />
+                    {k}<span className="fc_filter_num"> ({v})</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </FilterSection>
+
+          <FilterSection label="PRICE" open={openSections.price} onToggle={() => toggle('price')}
+            activeCount={activePrice ? 1 : 0}
+            activeLabel={activePrice ? `${activePrice[0]}-${activePrice[1]}` : null}
+            priceFilter
+            onClear={clearPrice}>
+            {facets.price_range?.min_price != null && (
+              <PriceFilter
+                open={openSections.price}
+                priceRange={facets.price_range}
+                sliderRange={facets.slider_price}
+                activePrice={activePrice}
+                onApply={applyPrice}
+                onClear={clearPrice}
+              />
+            )}
+          </FilterSection>
+        </div>
+      </div>
+    </>
   );
 }
 

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import './styles/theme-collection.css';
+import './styles/theme-collection-responsive.css';
 import './styles/theme-models.css';
 import './styles/theme-fitting-room.css';
 

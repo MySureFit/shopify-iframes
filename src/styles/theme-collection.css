@@ -18,14 +18,32 @@
   flex-shrink: 0;
 }
 
+.tec_header_top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  flex: 1;
+  min-width: 0;
+}
+
 .tec_logo_box {
   display: flex;
   align-items: center;
   position: relative;
+  flex-shrink: 0;
+}
+
+.tec_logo_box > a {
+  display: block;
+  flex-shrink: 0;
+  line-height: 0;
 }
 
 .tec_logo_img {
   max-width: 160px;
+  width: auto;
+  height: auto;
   margin-top: 4px;
   display: block;
 }
@@ -37,6 +55,7 @@
   line-height: 1 !important;
   font-size: 12px;
   margin-left: 10px;
+  flex-shrink: 0;
 }
 
 .tec_right_icon_box {

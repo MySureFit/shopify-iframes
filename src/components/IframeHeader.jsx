@@ -1,18 +1,21 @@
 import { navigateTo } from '../hooks/useIframeComms';
 import { useFittingRoom } from '../context/FittingRoomContext';
 
-export default function IframeHeader({ fullNav = false, hideFrLabel = false }) {
+export default function IframeHeader({
+  fullNav = false,
+  hideFrLabel = false,
+  mobileIconBar = null,
+}) {
   const { products } = useFittingRoom();
   const count = products?.length ?? 0;
 
   return (
-    <header className="tec_header">
+    <header className={`tec_header${mobileIconBar ? ' tec_header--mobile-icons' : ''}`}>
+      <div className="tec_header_top">
       <div className="tec_logo_box">
         <a href="/" data-posthog="mysurefit_logo_header">
           <img
             src="/assets/msf-main-logo-light-bg.png"
-            width="190"
-            height="46"
             className="tec_logo_img"
             alt="MySureFit"
           />
@@ -79,6 +82,9 @@ export default function IframeHeader({ fullNav = false, hideFrLabel = false }) {
           </>
         )}
       </div>
+      </div>
+
+      {mobileIconBar}
     </header>
   );
 }
