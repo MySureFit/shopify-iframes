@@ -30,6 +30,10 @@ export const BOTTOM_HIDES_DEFAULT = new Set([1, 3, 5, 6]);
 // Outerwear (7,8,9) does NOT hide default_top — it shows underneath the jacket
 export const TOP_HIDES_DEFAULT    = new Set([2, 4, 5, 6]);
 
+// Pure bottom/top sets used only to derive the product's target field
+const BOTTOM_LAYERS = new Set([1, 3]);
+const TOP_LAYERS    = new Set([2, 4, 7, 8, 9]);
+
 // When activating layer X, these other active layers get deactivated (from selfie-bundle.js)
 const LAYER_CONFLICTS = {
   3: [5, 6],
