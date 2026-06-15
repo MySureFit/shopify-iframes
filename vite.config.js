@@ -6,7 +6,7 @@ const SHOP_ORIGIN = 'https://2a9dc7.myshopify.com';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3001,
+    port: 3004,
     proxy: {
       '/sync': {
         target: 'https://shop-api.mysurefit.co',

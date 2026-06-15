@@ -1,8 +1,10 @@
 import { getLayerZ, TOP_HIDES_DEFAULT, BOTTOM_HIDES_DEFAULT } from '../context/FittingRoomContext';
 
 export default function FittingRoomViewer({ model, products, isLoading }) {
-  const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_HIDES_DEFAULT.has(p.detail?.layer_name));
-  const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_HIDES_DEFAULT.has(p.detail?.layer_name));
+  // While loading, keep previously-morphed images visible to prevent nude flash (mirrors lyr_prod_loader_N in legacy theme)
+  const shouldShow = (p) => p.morphedImage && (p.isTryingOn || isLoading);
+  const hasTopProduct    = products.some((p) => shouldShow(p) && TOP_HIDES_DEFAULT.has(p.detail?.layer_name));
+  const hasBottomProduct = products.some((p) => shouldShow(p) && BOTTOM_HIDES_DEFAULT.has(p.detail?.layer_name));
 
   if (!model) {
     return (
@@ -48,7 +50,7 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
 
         {/* Layers 4–13 — morphed product images for active (isTryingOn) products */}
         {products.map((p) =>
-          p.isTryingOn && p.morphedImage ? (
+          shouldShow(p) ? (
             <img
               key={p.v3_product_id}
               src={p.morphedImage}

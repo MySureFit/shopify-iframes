@@ -200,9 +200,15 @@ export function FittingRoomProvider({ children }) {
         ...prev,
         products: prev.products.map((p) => {
           if (p.v3_product_id === v3Id) return { ...p, isTryingOn: !p.isTryingOn };
-          // When activating, deactivate any product whose layer is in the conflict list
-          if (isActivating && p.isTryingOn && conflictSet.has(p.detail?.layer_name)) {
-            return { ...p, isTryingOn: false };
+          if (isActivating && p.isTryingOn) {
+            // Same-layer slot: only one product per layer at a time
+            if (clickedLayer != null && p.detail?.layer_name === clickedLayer) {
+              return { ...p, isTryingOn: false };
+            }
+            // Cross-layer conflict: deactivate products whose layer conflicts with the activated one
+            if (conflictSet.has(p.detail?.layer_name)) {
+              return { ...p, isTryingOn: false };
+            }
           }
           return p;
         }),
