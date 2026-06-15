@@ -1,12 +1,8 @@
-import { getLayerZ } from '../context/FittingRoomContext';
-
-// Theme layer classification: layers 1,3 = bottom; 2,4-9 = top
-const BOTTOM_LAYERS = new Set([1, 3]);
-const TOP_LAYERS    = new Set([2, 4, 5, 6, 7, 8, 9]);
+import { getLayerZ, TOP_HIDES_DEFAULT, BOTTOM_HIDES_DEFAULT } from '../context/FittingRoomContext';
 
 export default function FittingRoomViewer({ model, products, isLoading }) {
-  const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_LAYERS.has(p.detail?.layer_name));
-  const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_LAYERS.has(p.detail?.layer_name));
+  const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_HIDES_DEFAULT.has(p.detail?.layer_name));
+  const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_HIDES_DEFAULT.has(p.detail?.layer_name));
 
   if (!model) {
     return (

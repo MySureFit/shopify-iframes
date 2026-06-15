@@ -24,8 +24,22 @@ function writeLS(next) {
 const LAYER_Z = { 0:4,1:5,2:6,3:7,4:9,5:10,6:11,7:12,8:13,9:14 };
 export const getLayerZ = (layerName) => LAYER_Z[parseInt(layerName)] ?? 9;
 
-const BOTTOM_LAYERS = new Set([1, 3]);
-const TOP_LAYERS    = new Set([2, 4, 5, 6, 7, 8, 9]);
+// Layers that hide default_bottom when active (bottom, maxi dress, full dress)
+export const BOTTOM_HIDES_DEFAULT = new Set([1, 3, 5, 6]);
+// Layers that hide default_top when active (basic top, jacket, maxi dress, full dress)
+// Outerwear (7,8,9) does NOT hide default_top — it shows underneath the jacket
+export const TOP_HIDES_DEFAULT    = new Set([2, 4, 5, 6]);
+
+// When activating layer X, these other active layers get deactivated (from selfie-bundle.js)
+const LAYER_CONFLICTS = {
+  3: [5, 6],
+  4: [2, 6, 7, 8, 9],
+  5: [2, 3, 4, 6, 7, 8, 9],
+  6: [3, 4, 5, 7, 8, 9],
+  7: [5, 6, 8, 9],
+  8: [2, 4, 5, 6, 7, 9],
+  9: [5, 6, 7, 8],
+};
 
 export function FittingRoomProvider({ children }) {
   const { token } = useAuth();
@@ -171,12 +185,25 @@ export function FittingRoomProvider({ children }) {
   }, [setState]);
 
   const toggleTryOn = useCallback((v3Id) => {
-    setState((prev) => ({
-      ...prev,
-      products: prev.products.map((p) =>
-        p.v3_product_id === v3Id ? { ...p, isTryingOn: !p.isTryingOn } : p
-      ),
-    }));
+    setState((prev) => {
+      const clicked = prev.products.find(p => p.v3_product_id === v3Id);
+      if (!clicked) return prev;
+      const isActivating  = !clicked.isTryingOn;
+      const clickedLayer  = clicked.detail?.layer_name;
+      const conflictSet   = new Set(isActivating ? (LAYER_CONFLICTS[clickedLayer] ?? []) : []);
+
+      return {
+        ...prev,
+        products: prev.products.map((p) => {
+          if (p.v3_product_id === v3Id) return { ...p, isTryingOn: !p.isTryingOn };
+          // When activating, deactivate any product whose layer is in the conflict list
+          if (isActivating && p.isTryingOn && conflictSet.has(p.detail?.layer_name)) {
+            return { ...p, isTryingOn: false };
+          }
+          return p;
+        }),
+      };
+    });
   }, [setState]);
 
   const loadModels = useCallback(async () => {
