@@ -4,6 +4,9 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
   const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_HIDES_DEFAULT.has(p.detail?.layer_name));
   const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_HIDES_DEFAULT.has(p.detail?.layer_name));
 
+  // Show loader (opaque) whenever morph is fetching OR a tried-on product has no image yet
+  const showLoader = isLoading || products.some((p) => p.isTryingOn && !p.morphedImage);
+
   if (!model) {
     return (
       <div className="viewer-empty">
@@ -60,8 +63,8 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
         )}
       </div>
 
-      {/* Loading overlay while morph is fetching */}
-      {isLoading && (
+      {/* Loading overlay — shown while fetching OR while a tried-on product has no morph yet */}
+      {showLoader && (
         <div className="viewer-loader">
           <div className="spinner" />
         </div>
