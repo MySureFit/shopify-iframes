@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useFittingRoom } from '../context/FittingRoomContext';
-import { navigateTo } from '../hooks/useIframeComms';
+import { navigateTo, useParentMessages } from '../hooks/useIframeComms';
 import useMobileMode from '../hooks/useMobileMode';
 import IframeHeader from '../components/IframeHeader';
 import FittingRoomViewer from '../components/FittingRoomViewer';
@@ -168,7 +168,7 @@ export default function FittingRoomIframe() {
     products, currentModel,
     isLoadingModels, isLoadingMorph,
     loadModels, removeProduct, updateProductColor, toggleTryOn, fetchMorphedImages, isModelsStale,
-    loadUserDetail, loadFavorites,
+    loadUserDetail, loadFavorites, addProduct, isInFittingRoom,
   } = useFittingRoom();
 
   useEffect(() => {
@@ -189,6 +189,20 @@ export default function FittingRoomIframe() {
     fetchMorphedImages();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentModel?.id, products.length]);
+
+  // Accept products injected from the merchant's native Shopify pages via postMessage.
+  // The parent sends { type: 'SS_ADD_PRODUCTS', products: [{ v3_product_id, shopify_product_id }] }.
+  // We use our own session to add them — no auth token is passed in the message.
+  useParentMessages({
+    SS_ADD_PRODUCTS: ({ products: incoming = [] }) => {
+      if (!isAuthenticated) return;
+      for (const { v3_product_id, shopify_product_id } of incoming) {
+        if (!isInFittingRoom(v3_product_id)) {
+          addProduct(v3_product_id, shopify_product_id);
+        }
+      }
+    },
+  });
 
   if (!isAuthenticated) {
     return (
