@@ -202,6 +202,14 @@ export default function FittingRoomIframe() {
         }
       }
     },
+    SS_REMOVE_PRODUCTS: ({ products: incoming = [] }) => {
+      if (!isAuthenticated) return;
+      for (const { v3_product_id } of incoming) {
+        if (isInFittingRoom(v3_product_id)) {
+          removeProduct(v3_product_id);
+        }
+      }
+    },
   });
 
   if (!isAuthenticated) {
