@@ -52,11 +52,11 @@ function FittingRoomProductCard({ product, onRemove, onToggleTryOn, onFetchMorph
         <TrashIcon />
       </button>
       <a
-        href="javascript:void(0);"
+        href="#"
         className={`hanger${product.isTryingOn ? ' activeproduct' : ''}`}
         onClick={(e) => { e.preventDefault(); handleTryOn(); }}
       />
-      <a href="javascript:void(0);">
+      <a href="#" onClick={(e) => e.preventDefault()}>
         {thumb
           ? <img src={thumb} alt="" className="tec_product_box_img" loading="lazy" />
           : <div className="tec_product_box_img tec_product_no_img" />
@@ -147,7 +147,7 @@ function OutfitItem({ product, onRemove, onColorChange }) {
           </div>
         )}
 
-        <a href="javascript:void(0);" className="fitting_room_cl_prod_link">
+        <a href="#" onClick={(e) => e.preventDefault()} className="fitting_room_cl_prod_link">
           Product details
           <CaretIcon />
         </a>
@@ -237,7 +237,7 @@ export default function FittingRoomIframe() {
             <span className="green">Smart</span>
             {' '}Fitting Room
             <a
-              href="javascript:void(0);"
+              href="#"
               className="fr_fitting_room_h1_link fr_collection_h1_link"
               onClick={(e) => { e.preventDefault(); navigateTo('products'); }}
             >
@@ -250,7 +250,7 @@ export default function FittingRoomIframe() {
           <h3 className="fr_headline fr_headline_left">
             My <span className="green">Smart</span> Fitting Room
             <a
-              href="javascript:void(0);"
+              href="#"
               className="fr_fitting_room_h1_link"
               onClick={(e) => { e.preventDefault(); navigateTo('products'); }}
             >
@@ -283,7 +283,7 @@ export default function FittingRoomIframe() {
 
         <div className="fr_canvas_container">
           <a
-            href="javascript:void(0);"
+            href="#"
             className="change-modal-link open_model_modal_btn"
             onClick={(e) => { e.preventDefault(); navigateTo('models'); }}
           >
@@ -315,12 +315,12 @@ export default function FittingRoomIframe() {
                 <img src="/assets/change_moda_new.svg" className="fr_change_model_icon" alt="" />
               </div>
               <div className="fitting_room_icon_box">
-                <a href="javascript:void(0);" className="btn-fav icon_fitt_room" title="Favourite">
+                <a href="#" onClick={(e) => e.preventDefault()} className="btn-fav icon_fitt_room" title="Favourite">
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" aria-hidden="true">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                 </a>
-                <a href="javascript:void(0);" className="share_look_link icon_fitt_room" title="Share">
+                <a href="#" onClick={(e) => e.preventDefault()} className="share_look_link icon_fitt_room" title="Share">
                   <img src="/assets/share-dark.svg" className="fr_share_icon" alt="" />
                 </a>
               </div>

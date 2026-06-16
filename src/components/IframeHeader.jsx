@@ -50,22 +50,22 @@ export default function IframeHeader({
             <div className="gst_fr_right_menu_box">
               <div className="gst_right_header_login_box">
                 <p className="gst_right_header_text">
-                  <a href="javascript:void(0);" className="gst_right_header_login">Log in</a>
+                  <a href="#" onClick={(e) => e.preventDefault()} className="gst_right_header_login">Log in</a>
                   {' | '}
-                  <a href="javascript:void(0);" className="gst_right_header_signup">Sign up</a>
+                  <a href="#" onClick={(e) => e.preventDefault()} className="gst_right_header_signup">Sign up</a>
                 </p>
               </div>
               <div id="fr_mobile_cart_btn_origin_box">
                 <div className="gst_fr_cart_dropdown_box tec_cart_box">
                   <div className="top-cart">
-                    <a href="javascript:void(0);">
+                    <a href="#" onClick={(e) => e.preventDefault()}>
                       <img src="/assets/tec-icon-cart.png" className="shopping_cart_icon" alt="Cart" />
                     </a>
                   </div>
                 </div>
               </div>
               <div className="tec_rewards_box">
-                <a href="javascript:void(0)" className="tec_rewards_link">
+                <a href="#" onClick={(e) => e.preventDefault()} className="tec_rewards_link">
                   <p className="tec_rewards_value">$0.00</p>
                   <p className="tec_rewards_desc">CREDITS</p>
                 </a>
