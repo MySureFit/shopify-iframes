@@ -12,6 +12,17 @@
   flex-shrink: 0;
 }
 
+.collection_fitting-room.fitting-room-page .tec_header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1200;
+  height: 60px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
 .fitting-room-page .tec_right_icon_box {
   display: flex;
   align-items: center;
@@ -42,47 +53,50 @@
   font-size: 15px;
 }
 
-/* ── Three-column shell (theme vw layout) ──────────────── */
+/* ── Main shell ─────────────────────────────────────────── */
 .fr_main_container {
   position: relative;
   flex: 1;
   overflow: hidden;
 }
 
-.fr_product_grid_container {
-  position: absolute;
+.collection_fitting-room.fitting-room-page .fitting_room_main_container {
+  position: fixed;
+  top: 60px;
   left: 0;
-  top: 0;
-  width: 36vw;
-  height: calc(100vh - 60px);
-  z-index: 4;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 16px 24px;
-  box-sizing: border-box;
-}
-
-.fr_canvas_container {
-  position: absolute;
-  width: 28vw;
-  height: calc(100vh - 60px);
-  left: 36%;
-  top: 0;
-  box-sizing: border-box;
+  right: 0;
+  bottom: 0;
+  width: 100%;
   overflow: hidden;
 }
 
-.fr_current_items_container {
-  width: 36vw;
-  position: absolute;
-  height: calc(100vh - 60px);
-  left: 63%;
-  top: 0;
-  overflow: hidden;
-  padding: 0 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+/* Desktop three-column layout only — mobile rules live in theme-fitting-room-responsive.css */
+@media (min-width: 799px) {
+  .fr_product_grid_container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 36vw;
+    height: calc(100vh - 60px);
+    z-index: 4;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 16px 24px;
+    box-sizing: border-box;
+  }
+
+  .fr_current_items_container {
+    width: 36vw;
+    position: absolute;
+    height: calc(100vh - 60px);
+    left: 63%;
+    top: 0;
+    overflow: hidden;
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 /* ── Section headings ─────────────────────────────────── */
@@ -137,17 +151,32 @@
 /* ── Left: fitting room product grid (withModel) ───────── */
 .fr_product_grid_container #tec_product_grid_box {
   margin-right: -8px;
-  font-size: 0;
+}
+
+@media (min-width: 799px) {
+  .collection_fitting-room.fitting-room-page #tec_product_grid_box {
+    height: calc(100vh - 206px);
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 5px;
+  }
+
+  .fr_product_grid_container #tec_product_grid_box {
+    font-size: 0;
+  }
+
+  .fr_product_grid_container #tec_product_grid_box .tec_product_box.withModel {
+    width: 32%;
+    display: inline-block;
+    margin: 0.5%;
+    margin-left: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+    vertical-align: top;
+  }
 }
 
 .fr_product_grid_container #tec_product_grid_box .tec_product_box.withModel {
-  width: 32%;
-  display: inline-block;
-  margin: 0.5%;
-  margin-left: 0;
-  margin-bottom: 10px;
-  font-size: 14px;
-  vertical-align: top;
   border: 2px solid #dcdcdc;
   position: relative;
   overflow: hidden;
@@ -221,24 +250,38 @@
   display: none;
 }
 
-/* ── Center: model canvas ─────────────────────────────── */
-.fitting_canv_hldr {
-  width: 100%;
-  height: 100%;
-  margin-top: 8px;
-  padding-top: 6%;
-  box-sizing: border-box;
-  position: relative;
-  overflow: hidden;
-  background: #fff;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+/* ── Center: model canvas (collection.fitting-room.liquid structure) ── */
+@media (min-width: 799px) {
+  .fr_canvas_container {
+    position: absolute;
+    width: 28vw;
+    height: calc(100vh - 60px);
+    left: 36%;
+    top: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .change-modal-link {
+    position: absolute;
+    right: 19%;
+    top: 8%;
+    z-index: 1031;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    line-height: 14px;
+    color: #333;
+    font-family: Gilroymedium, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+  }
 }
 
 .change-modal-link {
-  position: static;
-  display: block;
   text-decoration: none;
   text-align: center;
   font-weight: 600;
@@ -256,24 +299,15 @@
   text-decoration: none;
 }
 
-.fr_canvas_side_actions {
-  position: absolute;
-  top: 0;
-  right: 43px;
-  bottom: 0;
-  z-index: 1030;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 8%;
-  padding-bottom: 18%;
-  pointer-events: none;
+.fitting_canv_hldr {
+  width: 100%;
+  height: 100%;
+  margin-top: 8px;
+  padding-top: 6%;
   box-sizing: border-box;
-}
-
-.fr_canvas_side_actions > * {
-  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
 }
 
 .fr_canvas_loading {
@@ -284,14 +318,10 @@
   gap: 12px;
   color: #aaa;
   font-size: 13px;
-}
-
-.fitting_canv_hldr .viewer-canvas {
-  width: 100%;
   height: 100%;
 }
 
-.fitting_canv_hldr > div:not(.fr_share_fav_box):not(.viewer-wrap):not(.fr_canvas_side_actions) {
+.fitting_canv_hldr .viewer-canvas {
   width: 100%;
   height: 100%;
 }
@@ -331,18 +361,47 @@
   z-index: 50;
 }
 
+/* traditional-styles.css .fr_share_fav_box */
 .fr_share_fav_box {
-  position: static;
+  position: absolute;
+  z-index: 1030;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
 }
 
+@media (min-width: 799px) {
+  .fr_share_fav_box {
+    top: calc(100vh - 270px);
+    right: 43px;
+  }
+}
+
 .fr_change_model_box {
   width: 22px;
   z-index: 1030;
   cursor: pointer;
+}
+
+.fr_add_to_cart_box {
+  display: none;
+}
+
+.btn_primary.fr_add_to_cart_btn {
+  padding: 0;
+  background: none;
+  border: none;
+  width: auto;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.btn_primary.fr_add_to_cart_btn .add_to_cart_icon {
+  width: 22px;
+  height: auto;
+  display: block;
+  position: static;
 }
 
 .fr_change_model_icon,
@@ -566,29 +625,8 @@
   font-size: 13px;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1100px) and (min-width: 799px) {
   .fr_product_grid_container #tec_product_grid_box .tec_product_box.withModel {
     width: 48%;
-  }
-}
-
-@media (max-width: 768px) {
-  .fr_product_grid_container,
-  .fr_canvas_container,
-  .fr_current_items_container {
-    position: relative;
-    width: 100%;
-    left: 0;
-    height: auto;
-  }
-
-  .fr_main_container {
-    overflow-y: auto;
-  }
-
-  .fitting-room-page {
-    height: auto;
-    min-height: 100vh;
-    overflow: auto;
   }
 }

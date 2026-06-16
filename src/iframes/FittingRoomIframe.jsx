@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useFittingRoom } from '../context/FittingRoomContext';
 import { navigateTo } from '../hooks/useIframeComms';
+import useMobileMode from '../hooks/useMobileMode';
 import IframeHeader from '../components/IframeHeader';
 import FittingRoomViewer from '../components/FittingRoomViewer';
 
@@ -191,7 +192,7 @@ export default function FittingRoomIframe() {
 
   if (!isAuthenticated) {
     return (
-      <div className="iframe-page fitting-room-page">
+      <div className="iframe-page fitting-room-page collection_fitting-room">
         <IframeHeader hideFrLabel />
         <div className="fr-auth-wall">
           <p>Please sign in to use the fitting room.</p>
@@ -202,12 +203,27 @@ export default function FittingRoomIframe() {
   }
 
   const tryingOnProducts = products.filter(p => p.isTryingOn);
+  const mobileMode = useMobileMode();
 
   return (
-    <div className="iframe-page fitting-room-page">
+    <div className={`iframe-page fitting-room-page collection_fitting-room${mobileMode ? ' mobile_mode' : ''}`}>
       <IframeHeader hideFrLabel />
 
-      <div className="fr_main_container">
+      <div className="fr_main_container fitting_room_main_container">
+        <div className="fr_fitting_room_header">
+          <h1 className="fr_fitting_room_h1">
+            <span className="green">Smart</span>
+            {' '}Fitting Room
+            <a
+              href="javascript:void(0);"
+              className="fr_fitting_room_h1_link fr_collection_h1_link"
+              onClick={(e) => { e.preventDefault(); navigateTo('products'); }}
+            >
+              Continue shopping
+            </a>
+          </h1>
+        </div>
+
         <div className="fr_product_grid_container">
           <h3 className="fr_headline fr_headline_left">
             My <span className="green">Smart</span> Fitting Room
@@ -244,6 +260,14 @@ export default function FittingRoomIframe() {
         </div>
 
         <div className="fr_canvas_container">
+          <a
+            href="javascript:void(0);"
+            className="change-modal-link open_model_modal_btn"
+            onClick={(e) => { e.preventDefault(); navigateTo('models'); }}
+          >
+            Change<br />Model
+          </a>
+
           <div className="fitting_canv_hldr" id="fitting_canv_hldr">
             {isLoadingModels ? (
               <div className="fr_canvas_loading">
@@ -264,29 +288,24 @@ export default function FittingRoomIframe() {
               />
             )}
 
-            <div className="fr_canvas_side_actions">
-              <a
-                href="javascript:void(0);"
-                className="change-modal-link"
-                onClick={(e) => { e.preventDefault(); navigateTo('models'); }}
-              >
-                Change<br />Model
-              </a>
-
-              <div className="fr_share_fav_box">
-                <div className="fr_change_model_box icon_fitt_room" onClick={() => navigateTo('models')} title="Change model">
-                  <img src="/assets/change_moda_new.svg" className="fr_change_model_icon" alt="" />
-                </div>
-                <div className="fitting_room_icon_box">
-                  <a href="javascript:void(0);" className="btn-fav icon_fitt_room" title="Favourite">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" aria-hidden="true">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  </a>
-                  <a href="javascript:void(0);" className="share_look_link icon_fitt_room" title="Share">
-                    <img src="/assets/share-dark.svg" className="fr_share_icon" alt="" />
-                  </a>
-                </div>
+            <div className="fr_share_fav_box">
+              <div className="fr_change_model_box icon_fitt_room open_model_modal_btn" onClick={() => navigateTo('models')} title="Change model">
+                <img src="/assets/change_moda_new.svg" className="fr_change_model_icon" alt="" />
+              </div>
+              <div className="fitting_room_icon_box">
+                <a href="javascript:void(0);" className="btn-fav icon_fitt_room" title="Favourite">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </a>
+                <a href="javascript:void(0);" className="share_look_link icon_fitt_room" title="Share">
+                  <img src="/assets/share-dark.svg" className="fr_share_icon" alt="" />
+                </a>
+              </div>
+              <div className="fr_add_to_cart_box">
+                <button type="button" className="btn_primary fr_add_to_cart_btn" title="Add outfit to cart">
+                  <img src="/assets/cart-plus.svg" className="add_to_cart_icon" alt="" />
+                </button>
               </div>
             </div>
           </div>
