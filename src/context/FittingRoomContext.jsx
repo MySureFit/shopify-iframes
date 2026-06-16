@@ -152,6 +152,10 @@ export function FittingRoomProvider({ children }) {
         syncApi.post('fitting_room/add_product', { product_id: String(v3Id), fr_user_id: frUserId }),
       ]);
       const detail = detailRes.data.data ?? detailRes.data;
+      if (detail.layer_name == null) {
+        const layerMatch = detail.shopify_tags?.match(/layer_number:(\d+)/);
+        detail.layer_name = layerMatch ? parseInt(layerMatch[1]) : null;
+      }
       setState((prev) => ({
         ...prev,
         products: [

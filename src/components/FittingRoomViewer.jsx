@@ -4,8 +4,8 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
   const hasTopProduct    = products.some((p) => p.isTryingOn && p.morphedImage && TOP_HIDES_DEFAULT.has(p.detail?.layer_name));
   const hasBottomProduct = products.some((p) => p.isTryingOn && p.morphedImage && BOTTOM_HIDES_DEFAULT.has(p.detail?.layer_name));
 
-  // Show loader (opaque) whenever morph is fetching OR a tried-on product has no image yet
-  const showLoader = isLoading || products.some((p) => p.isTryingOn && !p.morphedImage);
+  // Show a small corner badge while any morph is in-flight — no canvas overlay so the model never disappears
+  const showLoadingBadge = isLoading || products.some((p) => p.isTryingOn && !p.morphedImage);
 
   if (!model) {
     return (
@@ -63,9 +63,9 @@ export default function FittingRoomViewer({ model, products, isLoading }) {
         )}
       </div>
 
-      {/* Loading overlay — shown while fetching OR while a tried-on product has no morph yet */}
-      {showLoader && (
-        <div className="viewer-loader">
+      {/* Small corner badge — morph in-flight; model + existing layers stay fully visible */}
+      {showLoadingBadge && (
+        <div className="viewer-loading-badge">
           <div className="spinner" />
         </div>
       )}

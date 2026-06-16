@@ -351,14 +351,19 @@
   object-position: bottom center;
 }
 
-.viewer-loader {
+.viewer-loading-badge {
   position: absolute;
-  inset: 0;
-  background: #fff;
+  bottom: 12px;
+  right: 12px;
+  z-index: 50;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
 
 /* traditional-styles.css .fr_share_fav_box */
