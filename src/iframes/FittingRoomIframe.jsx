@@ -168,7 +168,7 @@ export default function FittingRoomIframe() {
     products, currentModel,
     isLoadingModels, isLoadingMorph,
     loadModels, removeProduct, updateProductColor, toggleTryOn, fetchMorphedImages, isModelsStale,
-    loadUserDetail, loadFavorites, addProduct, isInFittingRoom,
+    loadUserDetail, loadFavorites, addProductByShopifyId, isInFittingRoom,
   } = useFittingRoom();
 
   useEffect(() => {
@@ -190,24 +190,21 @@ export default function FittingRoomIframe() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentModel?.id, products.length]);
 
-  // Accept products injected from the merchant's native Shopify pages via postMessage.
-  // The parent sends { type: 'SS_ADD_PRODUCTS', products: [{ v3_product_id, shopify_product_id }] }.
-  // We use our own session to add them — no auth token is passed in the message.
+  // Accept products from the merchant's native Shopify pages via postMessage.
+  // Chris sends only shopify_product_id — we resolve to v3_product_id internally.
   useParentMessages({
     SS_ADD_PRODUCTS: ({ products: incoming = [] }) => {
       if (!isAuthenticated) return;
-      for (const { v3_product_id, shopify_product_id } of incoming) {
-        if (!isInFittingRoom(v3_product_id)) {
-          addProduct(v3_product_id, shopify_product_id);
-        }
+      for (const { shopify_product_id } of incoming) {
+        const alreadyIn = products.some((p) => String(p.shopify_product_id) === String(shopify_product_id));
+        if (!alreadyIn) addProductByShopifyId(shopify_product_id);
       }
     },
     SS_REMOVE_PRODUCTS: ({ products: incoming = [] }) => {
       if (!isAuthenticated) return;
-      for (const { v3_product_id } of incoming) {
-        if (isInFittingRoom(v3_product_id)) {
-          removeProduct(v3_product_id);
-        }
+      for (const { shopify_product_id } of incoming) {
+        const match = products.find((p) => String(p.shopify_product_id) === String(shopify_product_id));
+        if (match) removeProduct(match.v3_product_id);
       }
     },
   });

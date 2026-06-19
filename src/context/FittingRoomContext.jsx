@@ -168,6 +168,20 @@ export function FittingRoomProvider({ children }) {
     }
   }, [setState]);
 
+  // Resolves shopify_product_id → v3_product_id then delegates to addProduct.
+  // Used by SS_ADD_PRODUCTS postMessage handler (Chris sends only shopify_product_id).
+  const addProductByShopifyId = useCallback(async (shopifyProductId) => {
+    try {
+      const { data } = await syncApi.get(`shopify/resolve_product?shopify_product_id=${shopifyProductId}`);
+      const v3Id = data.v3_product_id;
+      if (!v3Id) return;
+      await addProduct(v3Id, shopifyProductId);
+    } catch (err) {
+      if (err?.response?.status === 404) return; // product not yet prepared — silent skip
+      console.error('addProductByShopifyId:', err);
+    }
+  }, [addProduct]);
+
   const removeProduct = useCallback(async (v3Id) => {
     const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
     setState((prev) => ({ ...prev, products: prev.products.filter((p) => p.v3_product_id !== v3Id) }));
@@ -321,7 +335,7 @@ export function FittingRoomProvider({ children }) {
       products, currentModel, allModels, modelsLoadedAt, isModelsStale,
       isLoadingModels, isLoadingMorph, productsServerLoaded,
       userDetail, favorites,
-      isInFittingRoom, toggleProduct, addProduct, removeProduct,
+      isInFittingRoom, toggleProduct, addProduct, addProductByShopifyId, removeProduct,
       updateProductColor, toggleTryOn, loadModels, selectModel, fetchMorphedImages,
       loadUserDetail, loadFavorites,
     }}>
