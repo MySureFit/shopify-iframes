@@ -6,13 +6,6 @@ const LS_TOKEN_KEY  = 'ss_auth_token';
 const LS_FR_USER_ID = 'ss_fr_user_id';
 const LS_USER_KEY   = 'ss_user';
 
-// Paste the full response from GET /sync/session/create?fr_user_id=... here.
-// Replace with a real backend call when the app is installed on a Shopify store.
-const MOCK_SESSION_RESPONSE = {
-  auth_token: '3371ad31-f525-219f-121f-3b2d37ee90d0',
-  server_url: 'https://api.mysurefit.co',
-  fr_user_id: '178134466527918561',
-};
 
 export function AuthProvider({ children }) {
   const [token, setToken]           = useState(() => localStorage.getItem(LS_TOKEN_KEY));
@@ -23,34 +16,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
 
-  // Bootstrap session on mount. Uses a hardcoded mock response for now —
-  // replace MOCK_SESSION_RESPONSE with a real backend call when ready.
+  // Mark session ready if token already in localStorage (returning visitor).
   useEffect(() => {
-    const initSession = async () => {
-      const existingToken = localStorage.getItem(LS_TOKEN_KEY);
-      if (existingToken) {
-        setSessionReady(true);
-        return;
-      }
-      try {
-        // TODO: replace with real call — await syncApi.get('session/create', { params: { fr_user_id } })
-        const data = MOCK_SESSION_RESPONSE;
-        const authToken = data.auth_token ?? data.token;
-        if (authToken) {
-          localStorage.setItem(LS_TOKEN_KEY, authToken);
-          setToken(authToken);
-        }
-        if (data.fr_user_id) {
-          localStorage.setItem(LS_FR_USER_ID, data.fr_user_id);
-        }
-      } catch (err) {
-        console.warn('Session init failed:', err.message);
-      } finally {
-        setSessionReady(true);
-      }
-    };
-
-    initSession();
+    if (localStorage.getItem(LS_TOKEN_KEY)) setSessionReady(true);
   }, []);
 
   // Sync token across iframes via storage events
@@ -83,6 +51,15 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Called by SS_AUTH postMessage handler when parent theme sends session tokens.
+  const setExternalSession = (auth_token, fr_user_id) => {
+    if (!auth_token) return;
+    localStorage.setItem(LS_TOKEN_KEY, auth_token);
+    if (fr_user_id) localStorage.setItem(LS_FR_USER_ID, String(fr_user_id));
+    setToken(auth_token);
+    setSessionReady(true);
+  };
+
   const logout = () => {
     localStorage.removeItem(LS_TOKEN_KEY);
     localStorage.removeItem(LS_USER_KEY);
@@ -97,7 +74,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: !!token,
       isLoggedIn: !!user,
       sessionReady,
-      login, logout,
+      login, logout, setExternalSession,
       loading, error,
     }}>
       {children}

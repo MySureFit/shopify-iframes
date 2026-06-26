@@ -163,7 +163,7 @@ function OutfitItem({ product, onRemove, onColorChange }) {
 }
 
 export default function FittingRoomIframe() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, setExternalSession } = useAuth();
   const {
     products, currentModel,
     isLoadingModels, isLoadingMorph,
@@ -193,6 +193,9 @@ export default function FittingRoomIframe() {
   // Accept products from the merchant's native Shopify pages via postMessage.
   // Chris sends only shopify_product_id — we resolve to v3_product_id internally.
   useParentMessages({
+    SS_AUTH: ({ auth_token, fr_user_id }) => {
+      setExternalSession(auth_token, fr_user_id);
+    },
     SS_ADD_PRODUCTS: ({ products: incoming = [] }) => {
       if (!isAuthenticated) return;
       for (const { shopify_product_id } of incoming) {
