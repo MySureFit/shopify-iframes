@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useFittingRoom } from '../context/FittingRoomContext';
 import { navigateTo, useParentMessages } from '../hooks/useIframeComms';
 import useMobileMode from '../hooks/useMobileMode';
 import IframeHeader from '../components/IframeHeader';
 import FittingRoomViewer from '../components/FittingRoomViewer';
+import syncApi from '../api/syncApi';
 
 function TrashIcon() {
   return (
@@ -162,6 +163,113 @@ function OutfitItem({ product, onRemove, onColorChange }) {
   );
 }
 
+// Case 3 — account linking flow (different email at this store than existing MSF account)
+function LinkAccountBanner({ linkState, setLinkState, onLinked }) {
+  const [email, setEmail]   = useState('');
+  const [otp, setOtp]       = useState('');
+  const [error, setError]   = useState('');
+  const [loading, setLoading] = useState(false);
+
+  if (linkState.step === 'hidden') return null;
+
+  const requestOtp = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await syncApi.post('app/link/request', {
+        email,
+        shopify_customer_id: linkState.shopify_customer_id,
+        store_domain:        linkState.store_domain,
+        new_user_id:         linkState.new_user_id,
+      });
+      setLinkState(s => ({ ...s, step: 'otp', existing_email: email }));
+    } catch (err) {
+      setError(err.response?.data?.error || 'Email not found. Check and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const { data } = await syncApi.post('app/link/verify', {
+        otp,
+        shopify_customer_id: linkState.shopify_customer_id,
+        store_domain:        linkState.store_domain,
+      });
+      onLinked(data.auth_token, data.fr_user_id);
+      setLinkState({ step: 'hidden' });
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid code. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fr-link-account-banner">
+      {linkState.step === 'prompt' && (
+        <>
+          <p>Already have a MySureFit account? Link it to keep your measurements.</p>
+          <div className="fr-link-account-actions">
+            <button className="btn_primary" type="button" onClick={() => setLinkState(s => ({ ...s, step: 'email' }))}>
+              Link existing account
+            </button>
+            <button className="btn_secondary" type="button" onClick={() => setLinkState({ step: 'hidden' })}>
+              Continue as new user
+            </button>
+          </div>
+        </>
+      )}
+      {linkState.step === 'email' && (
+        <>
+          <p>Enter your MySureFit email address:</p>
+          <input
+            type="email"
+            className="fr-link-input"
+            placeholder="your@email.com"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+          />
+          {error && <p className="fr-link-error">{error}</p>}
+          <div className="fr-link-account-actions">
+            <button className="btn_primary" type="button" onClick={requestOtp} disabled={loading || !email}>
+              {loading ? 'Sending...' : 'Send verification code'}
+            </button>
+            <button className="btn_secondary" type="button" onClick={() => setLinkState({ step: 'hidden' })}>
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+      {linkState.step === 'otp' && (
+        <>
+          <p>Enter the 6-digit code sent to {linkState.existing_email}:</p>
+          <input
+            type="text"
+            className="fr-link-input"
+            placeholder="000000"
+            maxLength={6}
+            value={otp}
+            onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+          />
+          {error && <p className="fr-link-error">{error}</p>}
+          <div className="fr-link-account-actions">
+            <button className="btn_primary" type="button" onClick={verifyOtp} disabled={loading || otp.length !== 6}>
+              {loading ? 'Verifying...' : 'Verify'}
+            </button>
+            <button className="btn_secondary" type="button" onClick={() => setLinkState({ step: 'hidden' })}>
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function FittingRoomIframe() {
   const { isAuthenticated, setExternalSession } = useAuth();
   const {
@@ -170,6 +278,9 @@ export default function FittingRoomIframe() {
     loadModels, removeProduct, updateProductColor, toggleTryOn, fetchMorphedImages, isModelsStale,
     loadUserDetail, loadFavorites, addProductByShopifyId, isInFittingRoom,
   } = useFittingRoom();
+
+  // Case 3 link state: tracks shopify_customer_id + store_domain + new_user_id across the OTP flow
+  const [linkState, setLinkState] = useState({ step: 'hidden' });
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -193,8 +304,11 @@ export default function FittingRoomIframe() {
   // Accept products from the merchant's native Shopify pages via postMessage.
   // Chris sends only shopify_product_id — we resolve to v3_product_id internally.
   useParentMessages({
-    SS_AUTH: ({ auth_token, fr_user_id }) => {
+    SS_AUTH: ({ auth_token, fr_user_id, is_new_user, shopify_customer_id, store_domain }) => {
       setExternalSession(auth_token, fr_user_id);
+      if (is_new_user && shopify_customer_id && store_domain) {
+        setLinkState({ step: 'prompt', shopify_customer_id, store_domain, new_user_id: fr_user_id });
+      }
     },
     SS_ADD_PRODUCTS: ({ products: incoming = [] }) => {
       if (!isAuthenticated) return;
@@ -227,9 +341,15 @@ export default function FittingRoomIframe() {
   const tryingOnProducts = products.filter(p => p.isTryingOn);
   const mobileMode = useMobileMode();
 
+  const handleLinked = (auth_token, fr_user_id) => {
+    setExternalSession(auth_token, fr_user_id);
+  };
+
   return (
     <div className={`iframe-page fitting-room-page collection_fitting-room${mobileMode ? ' mobile_mode' : ''}`}>
       <IframeHeader hideFrLabel />
+
+      <LinkAccountBanner linkState={linkState} setLinkState={setLinkState} onLinked={handleLinked} />
 
       <div className="fr_main_container fitting_room_main_container">
         <div className="fr_fitting_room_header">
