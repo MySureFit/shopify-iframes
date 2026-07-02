@@ -16,7 +16,8 @@ function readLS() {
 }
 
 function writeLS(next) {
-  localStorage.setItem(LS_KEY, JSON.stringify(next));
+  const { userDetail: _ud, ...safe } = next;
+  localStorage.setItem(LS_KEY, JSON.stringify(safe));
 }
 
 // Map integer layer_name (0–9) to CSS z-index
@@ -48,7 +49,7 @@ const LAYER_CONFLICTS = {
 export function FittingRoomProvider({ children }) {
   const { token } = useAuth();
   const [state, setStateRaw] = useState(readLS);
-  const loadedForToken = useRef(null); // guard: only load once per unique token
+  const loadedForToken = useRef(null); // guard: only load once per unique session key (token or '__guest__')
 
   // Sync from other iframes via storage events (fires in all frames EXCEPT the one that wrote)
   useEffect(() => {
@@ -74,16 +75,50 @@ export function FittingRoomProvider({ children }) {
   const [isLoadingMorph,       setLoadingMorph]       = useState(false);
   const [productsServerLoaded, setProductsServerLoaded] = useState(false);
 
-  // Load fitting room products from server once per unique token
+  // Load fitting room products — mirrors theme logic:
+  // authenticated → user_id param (from user/detail); guest → fr_user_id param (from localStorage)
   useEffect(() => {
-    if (!token || loadedForToken.current === token) return;
-    loadedForToken.current = token;
-    const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
+    const sessionKey = token ?? '__guest__';
+    if (loadedForToken.current === sessionKey) return;
+    loadedForToken.current = sessionKey;
+
     const load = async () => {
       try {
-        const { data } = await coreApi.get('search/filter/products', {
-          params: { collection: 'fitting-room', fr_user_id: frUserId },
-        });
+        let params = { collection: 'fitting-room' };
+
+        if (token) {
+          // Authenticated: call user/detail once (mirrors theme's load_member_data).
+          // user_calibrated === 1 → fully calibrated → use user_id (search index has their data).
+          // user_calibrated === 0 or -1 → not calibrated → fall back to fr_user_id like a guest.
+          const { data: detailData } = await syncApi.get('user/detail?device=webfr');
+          const userDetail = detailData.data ?? detailData;
+          const userId = userDetail.user?.id ?? userDetail.id;
+          const userCalibrated = userDetail.user?.user_calibrated ?? userDetail.user_calibrated;
+          setState((prev) => ({ ...prev, userDetail }));
+          // Also load favorites now that we have userId — avoids a second user/detail call
+          if (userId) {
+            try {
+              const { data: favData } = await syncApi.get(`favourite/get_all_fav_product/${userId}`);
+              const raw = favData.data ?? {};
+              const favorites = Object.values(raw).map((f) => f.z_global_id ?? f.product_id ?? f.id).filter(Boolean);
+              setState((prev) => ({ ...prev, favorites }));
+            } catch {}
+          }
+          if (userCalibrated === 1) {
+            params.user_id = userId;
+          } else {
+            const frUserId = localStorage.getItem(LS_FR_USER_ID);
+            if (!frUserId) { setProductsServerLoaded(true); return; }
+            params.fr_user_id = frUserId;
+          }
+        } else {
+          // Guest: use fr_user_id from localStorage — same as theme's getCookie('fr_user_id')
+          const frUserId = localStorage.getItem(LS_FR_USER_ID);
+          if (!frUserId) { setProductsServerLoaded(true); return; }
+          params.fr_user_id = frUserId;
+        }
+
+        const { data } = await coreApi.get('search/filter/products', { params });
         const variants = data.data ?? data.products ?? (Array.isArray(data) ? data : []);
 
         // Group flat variant list by shopify_product_id → one product entry per unique product
@@ -91,7 +126,6 @@ export function FittingRoomProvider({ children }) {
         for (const v of variants) {
           const key = v.shopify_product_id;
           if (!productMap[key]) {
-            // Extract layer_name from shopify_tags (e.g. "layer_number:3")
             const layerMatch = v.shopify_tags?.match(/layer_number:(\d+)/);
             const layerName  = layerMatch ? parseInt(layerMatch[1]) : null;
             const target     = BOTTOM_LAYERS.has(layerName) ? 'bottom'
@@ -126,8 +160,7 @@ export function FittingRoomProvider({ children }) {
           });
         }
 
-        const mapped = Object.values(productMap);
-        setState(prev => ({ ...prev, products: mapped }));
+        setState(prev => ({ ...prev, products: Object.values(productMap) }));
         setProductsServerLoaded(true);
       } catch (err) {
         console.error('loadFittingRoom:', err);
@@ -145,11 +178,13 @@ export function FittingRoomProvider({ children }) {
   );
 
   const addProduct = useCallback(async (v3Id, shopifyId) => {
-    const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
+    const frUserId = localStorage.getItem(LS_FR_USER_ID);
+    const payload = { product_id: String(v3Id) };
+    if (frUserId) payload.fr_user_id = frUserId;
     try {
       const [detailRes] = await Promise.all([
         syncApi.get(`shopify/product_detail_shopv3/${v3Id}`),
-        syncApi.post('fitting_room/add_product', { product_id: String(v3Id), fr_user_id: frUserId }),
+        syncApi.post('fitting_room/add_product', payload),
       ]);
       const detail = detailRes.data.data ?? detailRes.data;
       if (detail.layer_name == null) {
@@ -183,10 +218,12 @@ export function FittingRoomProvider({ children }) {
   }, [addProduct]);
 
   const removeProduct = useCallback(async (v3Id) => {
-    const frUserId = localStorage.getItem(LS_FR_USER_ID) ?? '';
+    const frUserId = localStorage.getItem(LS_FR_USER_ID);
+    const payload = { product_id: String(v3Id) };
+    if (frUserId) payload.fr_user_id = frUserId;
     setState((prev) => ({ ...prev, products: prev.products.filter((p) => p.v3_product_id !== v3Id) }));
     try {
-      await syncApi.post('fitting_room/remove_product', { product_id: String(v3Id), fr_user_id: frUserId });
+      await syncApi.post('fitting_room/remove_product', payload);
     } catch (err) {
       console.error('removeProduct:', err);
     }
@@ -292,16 +329,17 @@ export function FittingRoomProvider({ children }) {
   }, [setState]);
 
   const loadUserDetail = useCallback(async () => {
+    if (userDetail) return userDetail;
     try {
       const { data } = await syncApi.get('user/detail?device=webfr');
-      const userDetail = data.data ?? data;
-      setState((prev) => ({ ...prev, userDetail }));
-      return userDetail;
+      const detail = data.data ?? data;
+      setState((prev) => ({ ...prev, userDetail: detail }));
+      return detail;
     } catch (err) {
       console.error('loadUserDetail:', err);
       return null;
     }
-  }, [setState]);
+  }, [userDetail, setState]);
 
   const loadFavorites = useCallback(async (memberId) => {
     if (!memberId) return;
@@ -315,23 +353,33 @@ export function FittingRoomProvider({ children }) {
     }
   }, [setState]);
 
-  const fetchMorphedImages = useCallback(async () => {
+  const fetchMorphedImages = useCallback(async (singleV3Id = null) => {
     if (!currentModel || products.length === 0) return;
     setLoadingMorph(true);
+    // user_calibrated === 1 (from user/detail) → pre-computed morph images (service_type=search).
+    // Non-calibrated or demo model → service_type=hanger.
+    const userCalibrated = userDetail?.user?.user_calibrated ?? userDetail?.user_calibrated;
+    const serviceType = userCalibrated === 1 ? 'search' : 'hanger';
     try {
-      const { data } = await coreApi.post('get_morph_styles', {
-        product_ids: products.map((p) => p.z_global_id ?? p.v3_product_id),
-        user_id:     currentModel.user_id,
-      });
-      const results = Array.isArray(data) ? data : data.data ?? [];
+      const targets = singleV3Id ? products.filter((p) => p.v3_product_id === singleV3Id) : products;
+      const morphMap = {};
+      await Promise.all(
+        targets.map(async (p) => {
+          try {
+            const { data } = await syncApi.get(`shopify/product_detail_shopv3/${p.v3_product_id}?service_type=${serviceType}`);
+            const detail = data.data ?? data;
+            const items = detail.items ?? [];
+            const item = items.find((i) => i.color_id === p.selectedColorId) ?? items[0];
+            morphMap[p.v3_product_id] = item?.image?.hi_res ?? item?.image?.low_res ?? item?.image ?? null;
+          } catch {}
+        })
+      );
       setState((prev) => ({
         ...prev,
-        products: prev.products.map((p) => {
-          const gid = p.z_global_id ?? p.v3_product_id;
-          const m = results.find((r) => String(r.product_id) === String(gid));
-          const item = m?.items?.find((i) => i.color_id === p.selectedColorId) ?? m?.items?.[0];
-          return { ...p, morphedImage: item?.morphed_image ?? item?.image ?? null };
-        }),
+        products: prev.products.map((p) => ({
+          ...p,
+          morphedImage: p.v3_product_id in morphMap ? morphMap[p.v3_product_id] : p.morphedImage,
+        })),
       }));
     } catch (err) {
       console.error('fetchMorphedImages:', err);

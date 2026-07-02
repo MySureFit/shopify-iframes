@@ -36,7 +36,7 @@ function FittingRoomProductCard({ product, onRemove, onToggleTryOn, onFetchMorph
   const handleTryOn = () => {
     const activating = !product.isTryingOn;
     onToggleTryOn(product.v3_product_id);
-    if (activating && !product.morphedImage && currentModel) onFetchMorph();
+    if (activating && !product.morphedImage && currentModel) onFetchMorph(product.v3_product_id);
   };
 
   return (
@@ -275,8 +275,8 @@ export default function FittingRoomIframe() {
   const {
     products, currentModel,
     isLoadingModels, isLoadingMorph,
-    loadModels, removeProduct, updateProductColor, toggleTryOn, fetchMorphedImages, isModelsStale,
-    loadUserDetail, loadFavorites, addProductByShopifyId, isInFittingRoom,
+    loadModels, removeProduct, updateProductColor, toggleTryOn, fetchMorphedImages,
+    addProductByShopifyId, isInFittingRoom,
   } = useFittingRoom();
 
   // Case 3 link state: tracks shopify_customer_id + store_domain + new_user_id across the OTP flow
@@ -284,11 +284,7 @@ export default function FittingRoomIframe() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (!currentModel || isModelsStale) loadModels();
-    loadUserDetail().then((detail) => {
-      const memberId = detail?.user?.id;
-      if (memberId) loadFavorites(memberId);
-    });
+    loadModels();
   }, [isAuthenticated]);
 
   // Pre-fetch morphed images for all fitting-room products as soon as model + products are ready.
