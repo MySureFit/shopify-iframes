@@ -304,8 +304,13 @@ export default function FittingRoomIframe() {
   // Accept products from the merchant's native Shopify pages via postMessage.
   // Chris sends only shopify_product_id — we resolve to v3_product_id internally.
   useParentMessages({
-    SS_AUTH: ({ auth_token, fr_user_id, is_new_user, shopify_customer_id, store_domain }) => {
+    SS_AUTH: ({ auth_token, fr_user_id, is_new_user, is_calibrated, shopify_customer_id, store_domain }) => {
       setExternalSession(auth_token, fr_user_id);
+      if (!is_calibrated) {
+        // Uncalibrated user — send to models/selfie upload first
+        navigateTo('models');
+        return;
+      }
       if (is_new_user && shopify_customer_id && store_domain) {
         setLinkState({ step: 'prompt', shopify_customer_id, store_domain, new_user_id: fr_user_id });
       }
