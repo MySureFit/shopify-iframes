@@ -74,6 +74,22 @@ function UploadModelCard({ onClick }) {
   );
 }
 
+function UserSelfieCard({ model, onSelect }) {
+  const img = model.image?.web_res ?? model.image_no_cloths ?? model.image;
+  return (
+    <div className="dm_selection_box dm_Selected" onClick={onSelect}>
+      {img && <img src={img} className="dm_selection_img dm_Selected" alt="" />}
+      {model.default_bottom && (
+        <img src={model.default_bottom} className="dm_default_clothes_img dm_selection_img" alt="" />
+      )}
+      {model.default_top && (
+        <img src={model.default_top} className="dm_default_clothes_img dm_selection_img" alt="" />
+      )}
+      <p className="dm_selection_label">See it on you</p>
+    </div>
+  );
+}
+
 function DemoModelCard({ model, isSelected, onSelect }) {
   const img = model.image?.web_res ?? model.image_no_cloths ?? model.image;
   const showClothes = Number(model.id) > 100;
@@ -81,7 +97,7 @@ function DemoModelCard({ model, isSelected, onSelect }) {
   return (
     <div
       className={`dm_selection_box${isSelected ? ' dm_Selected' : ''}`}
-      onClick={() => !isSelected && onSelect(model.id)}
+      onClick={() => onSelect(model.id)}
     >
       {img && (
         <img
@@ -130,12 +146,10 @@ export default function ModelsIframe() {
 
   if (!isAuthenticated) return <InlineLogin />;
 
-  const showUpload = calibrated !== 1;
-  const sortedModels = [...allModels].sort((a, b) => {
-    if (a.is_selected) return -1;
-    if (b.is_selected) return 1;
-    return 0;
-  });
+  // User's personal selfie model has is_calibrated === 1 — separate from demo models
+  const userSelfieModel = allModels.find((m) => m.is_calibrated === 1);
+  const demoModels = allModels.filter((m) => m.is_calibrated !== 1);
+  const showUpload = !userSelfieModel && calibrated !== 1;
 
   return (
     <div className="iframe-page select-model-page">
@@ -153,8 +167,11 @@ export default function ModelsIframe() {
                 <div className="loading-screen"><div className="spinner" /></div>
               ) : (
                 <div id="dm_selection_container" className="list">
-                  {showUpload && <UploadModelCard onClick={handleUploadPhoto} />}
-                  {sortedModels.map((model) => (
+                  {userSelfieModel
+                    ? <UserSelfieCard model={userSelfieModel} onSelect={() => handleSelectModel(userSelfieModel.id)} />
+                    : <UploadModelCard onClick={handleUploadPhoto} />
+                  }
+                  {demoModels.map((model) => (
                     <DemoModelCard
                       key={model.id}
                       model={model}
