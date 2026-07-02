@@ -255,6 +255,16 @@ export function FittingRoomProvider({ children }) {
     }
   }, [setState]);
 
+  // Selecting the user's own calibrated selfie uses selected_model_id: 0
+  const selectUserSelfie = useCallback(async () => {
+    try {
+      await syncApi.post('demomodel/save_model', { selected_model_id: 0 });
+      await loadModels();
+    } catch (err) {
+      console.error('selectUserSelfie:', err);
+    }
+  }, [setState]);
+
   const selectModel = useCallback(async (modelId) => {
     try {
       await syncApi.post('demomodel/save_model', { selected_model_id: modelId });
@@ -336,7 +346,7 @@ export function FittingRoomProvider({ children }) {
       isLoadingModels, isLoadingMorph, productsServerLoaded,
       userDetail, favorites,
       isInFittingRoom, toggleProduct, addProduct, addProductByShopifyId, removeProduct,
-      updateProductColor, toggleTryOn, loadModels, selectModel, fetchMorphedImages,
+      updateProductColor, toggleTryOn, loadModels, selectModel, selectUserSelfie, fetchMorphedImages,
       loadUserDetail, loadFavorites,
     }}>
       {children}

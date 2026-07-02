@@ -119,7 +119,7 @@ function DemoModelCard({ model, isSelected, onSelect }) {
 
 export default function ModelsIframe() {
   const { isAuthenticated } = useAuth();
-  const { allModels, currentModel, isLoadingModels, isModelsStale, loadModels, selectModel } = useFittingRoom();
+  const { allModels, currentModel, isLoadingModels, isModelsStale, loadModels, selectModel, selectUserSelfie } = useFittingRoom();
   const [calibrated, setCalibrated] = useState(null);
 
   useEffect(() => {
@@ -168,7 +168,7 @@ export default function ModelsIframe() {
               ) : (
                 <div id="dm_selection_container" className="list">
                   {userSelfieModel
-                    ? <UserSelfieCard model={userSelfieModel} onSelect={() => handleSelectModel(userSelfieModel.id)} />
+                    ? <UserSelfieCard model={userSelfieModel} onSelect={async () => { await selectUserSelfie(); navigateTo('fitting-room'); }} />
                     : <UploadModelCard onClick={handleUploadPhoto} />
                   }
                   {demoModels.map((model) => (
