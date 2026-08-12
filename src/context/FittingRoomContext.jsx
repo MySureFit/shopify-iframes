@@ -49,6 +49,9 @@ const LAYER_CONFLICTS = {
 export function FittingRoomProvider({ children }) {
   const { token } = useAuth();
   const [state, setStateRaw] = useState(readLS);
+  const [shopDomain, setShopDomain] = useState(
+    () => new URLSearchParams(window.location.search).get('shop') || null
+  );
   const loadedForToken = useRef(null); // guard: only load once per unique session key (token or '__guest__')
 
   // Sync from other iframes via storage events (fires in all frames EXCEPT the one that wrote)
@@ -207,7 +210,9 @@ export function FittingRoomProvider({ children }) {
   // Used by SS_ADD_PRODUCTS postMessage handler (Chris sends only shopify_product_id).
   const addProductByShopifyId = useCallback(async (shopifyProductId) => {
     try {
-      const { data } = await syncApi.get(`shopify/resolve_product?shopify_product_id=${shopifyProductId}`);
+      const params = new URLSearchParams({ shopify_product_id: shopifyProductId });
+      if (shopDomain) params.append('shop', shopDomain);
+      const { data } = await syncApi.get(`shopify/resolve_product?${params}`);
       const v3Id = data.v3_product_id;
       if (!v3Id) return;
       await addProduct(v3Id, shopifyProductId);
@@ -215,7 +220,7 @@ export function FittingRoomProvider({ children }) {
       if (err?.response?.status === 404) return; // product not yet prepared — silent skip
       console.error('addProductByShopifyId:', err);
     }
-  }, [addProduct]);
+  }, [addProduct, shopDomain]);
 
   const removeProduct = useCallback(async (v3Id) => {
     const frUserId = localStorage.getItem(LS_FR_USER_ID);
@@ -392,7 +397,7 @@ export function FittingRoomProvider({ children }) {
     <FittingRoomContext.Provider value={{
       products, currentModel, allModels, modelsLoadedAt, isModelsStale,
       isLoadingModels, isLoadingMorph, productsServerLoaded,
-      userDetail, favorites,
+      userDetail, favorites, shopDomain, setShopDomain,
       isInFittingRoom, toggleProduct, addProduct, addProductByShopifyId, removeProduct,
       updateProductColor, toggleTryOn, loadModels, selectModel, selectUserSelfie, fetchMorphedImages,
       loadUserDetail, loadFavorites,

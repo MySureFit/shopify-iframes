@@ -276,7 +276,7 @@ export default function FittingRoomIframe() {
     products, currentModel,
     isLoadingModels, isLoadingMorph,
     loadModels, removeProduct, updateProductColor, toggleTryOn, fetchMorphedImages,
-    addProductByShopifyId, isInFittingRoom,
+    addProductByShopifyId, isInFittingRoom, setShopDomain,
   } = useFittingRoom();
 
   // Case 3 link state: tracks shopify_customer_id + store_domain + new_user_id across the OTP flow
@@ -302,6 +302,7 @@ export default function FittingRoomIframe() {
   useParentMessages({
     SS_AUTH: ({ auth_token, fr_user_id, is_new_user, is_calibrated, shopify_customer_id, store_domain }) => {
       setExternalSession(auth_token, fr_user_id);
+      if (store_domain) setShopDomain(store_domain);
       if (!is_calibrated) {
         // Uncalibrated user — send to models/selfie upload first
         navigateTo('models');
