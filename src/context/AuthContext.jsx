@@ -30,6 +30,19 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  // Listen for SS_AUTH postMessage from parent window so auth can arrive before
+  // the iframe components mount (avoids chicken-and-egg with the sessionReady spinner).
+  useEffect(() => {
+    const onMessage = (e) => {
+      if (e.data?.source !== 'selfiestyler' || e.data?.type !== 'SS_AUTH') return;
+      const { auth_token, fr_user_id } = e.data;
+      setExternalSession(auth_token, fr_user_id);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const login = async (email, password) => {
     setLoading(true);
     setError(null);
