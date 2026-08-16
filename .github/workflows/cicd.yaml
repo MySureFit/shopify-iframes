@@ -27,4 +27,4 @@ jobs:
           npm run build
 
       - name: Reload nginx
-        run: sudo nginx -s reload
+        run: sudo nginx -s reload 2>/dev/null || sudo nginx
