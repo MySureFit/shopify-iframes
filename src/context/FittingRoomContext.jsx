@@ -8,6 +8,9 @@ const LS_KEY = 'ss_fr';
 const LS_FR_USER_ID = 'ss_fr_user_id';
 const MODELS_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
+// Capture shop from URL before React Router changes window.location
+const INITIAL_SHOP = new URLSearchParams(window.location.search).get('shop') || null;
+
 const DEFAULT = { products: [], currentModel: null, allModels: [], modelsLoadedAt: null, userDetail: null, favorites: [] };
 
 function readLS() {
@@ -49,9 +52,7 @@ const LAYER_CONFLICTS = {
 export function FittingRoomProvider({ children }) {
   const { token } = useAuth();
   const [state, setStateRaw] = useState(readLS);
-  const [shopDomain, setShopDomain] = useState(
-    () => new URLSearchParams(window.location.search).get('shop') || null
-  );
+  const [shopDomain, setShopDomain] = useState(INITIAL_SHOP);
   const loadedForToken = useRef(null); // guard: only load once per unique session key (token or '__guest__')
 
   // Sync from other iframes via storage events (fires in all frames EXCEPT the one that wrote)
