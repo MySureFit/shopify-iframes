@@ -303,8 +303,8 @@ export default function FittingRoomIframe() {
     SS_AUTH: ({ auth_token, fr_user_id, is_new_user, is_calibrated, shopify_customer_id, store_domain }) => {
       setExternalSession(auth_token, fr_user_id);
       if (store_domain) setShopDomain(store_domain);
-      if (!is_calibrated) {
-        // Uncalibrated user — send to models/selfie upload first
+      if (!is_calibrated && !currentModel) {
+        // Uncalibrated user with no model selected — send to models/selfie upload first
         navigateTo('models');
         return;
       }
