@@ -10,6 +10,7 @@ const MODELS_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 // Capture shop from URL before React Router changes window.location
 const INITIAL_SHOP = new URLSearchParams(window.location.search).get('shop') || null;
+console.log('[FR] INITIAL_SHOP at module load:', INITIAL_SHOP, '| full search:', window.location.search);
 
 const DEFAULT = { products: [], currentModel: null, allModels: [], modelsLoadedAt: null, userDetail: null, favorites: [] };
 
@@ -217,6 +218,7 @@ export function FittingRoomProvider({ children }) {
   const addProductByShopifyId = useCallback(async (shopifyProductId) => {
     try {
       const params = new URLSearchParams({ shopify_product_id: shopifyProductId });
+      console.log('[FR] shopDomainRef at call time:', shopDomainRef.current);
       if (shopDomainRef.current) params.append('shop', shopDomainRef.current);
       console.log('[FR] resolve_product →', `shopify/resolve_product?${params}`);
       const { data } = await syncApi.get(`shopify/resolve_product?${params}`);
