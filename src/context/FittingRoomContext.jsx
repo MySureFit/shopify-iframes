@@ -52,7 +52,12 @@ const LAYER_CONFLICTS = {
 export function FittingRoomProvider({ children }) {
   const { token } = useAuth();
   const [state, setStateRaw] = useState(readLS);
-  const [shopDomain, setShopDomain] = useState(INITIAL_SHOP);
+  const shopDomainRef = useRef(INITIAL_SHOP);
+  const [shopDomain, setShopDomainState] = useState(INITIAL_SHOP);
+  const setShopDomain = useCallback((domain) => {
+    shopDomainRef.current = domain;
+    setShopDomainState(domain);
+  }, []);
   const loadedForToken = useRef(null); // guard: only load once per unique session key (token or '__guest__')
 
   // Sync from other iframes via storage events (fires in all frames EXCEPT the one that wrote)
@@ -212,7 +217,7 @@ export function FittingRoomProvider({ children }) {
   const addProductByShopifyId = useCallback(async (shopifyProductId) => {
     try {
       const params = new URLSearchParams({ shopify_product_id: shopifyProductId });
-      if (shopDomain) params.append('shop', shopDomain);
+      if (shopDomainRef.current) params.append('shop', shopDomainRef.current);
       console.log('[FR] resolve_product →', `shopify/resolve_product?${params}`);
       const { data } = await syncApi.get(`shopify/resolve_product?${params}`);
       console.log('[FR] resolve_product response:', data);
@@ -223,7 +228,7 @@ export function FittingRoomProvider({ children }) {
       if (err?.response?.status === 404) { console.warn('[FR] resolve_product 404 for', shopifyProductId); return; }
       console.error('addProductByShopifyId:', err);
     }
-  }, [addProduct, shopDomain]);
+  }, [addProduct]);
 
   const removeProduct = useCallback(async (v3Id) => {
     const frUserId = localStorage.getItem(LS_FR_USER_ID);
