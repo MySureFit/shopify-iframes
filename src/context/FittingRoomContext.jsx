@@ -212,12 +212,14 @@ export function FittingRoomProvider({ children }) {
     try {
       const params = new URLSearchParams({ shopify_product_id: shopifyProductId });
       if (shopDomain) params.append('shop', shopDomain);
+      console.log('[FR] resolve_product →', `shopify/resolve_product?${params}`);
       const { data } = await syncApi.get(`shopify/resolve_product?${params}`);
+      console.log('[FR] resolve_product response:', data);
       const v3Id = data.v3_product_id;
-      if (!v3Id) return;
+      if (!v3Id) { console.warn('[FR] no v3_product_id returned for', shopifyProductId); return; }
       await addProduct(v3Id, shopifyProductId);
     } catch (err) {
-      if (err?.response?.status === 404) return; // product not yet prepared — silent skip
+      if (err?.response?.status === 404) { console.warn('[FR] resolve_product 404 for', shopifyProductId); return; }
       console.error('addProductByShopifyId:', err);
     }
   }, [addProduct, shopDomain]);

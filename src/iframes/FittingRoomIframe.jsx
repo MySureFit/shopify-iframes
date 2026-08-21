@@ -312,9 +312,14 @@ export default function FittingRoomIframe() {
       }
     },
     SS_ADD_PRODUCTS: ({ products: incoming = [] }) => {
-      if (!isAuthenticated) return;
+      console.log('[FR] SS_ADD_PRODUCTS received', incoming, '| isAuthenticated:', isAuthenticated);
+      if (!isAuthenticated) {
+        console.warn('[FR] SS_ADD_PRODUCTS blocked — not authenticated yet');
+        return;
+      }
       for (const { shopify_product_id } of incoming) {
         const alreadyIn = products.some((p) => String(p.shopify_product_id) === String(shopify_product_id));
+        console.log('[FR] product', shopify_product_id, '| alreadyIn:', alreadyIn);
         if (!alreadyIn) addProductByShopifyId(shopify_product_id);
       }
     },
